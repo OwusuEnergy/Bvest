@@ -11,7 +11,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/logo';
 import { useAuth } from '@/firebase';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 const ADMIN_MAGIC_CODE = '0596352632';
 const ADMIN_EMAIL = 'admin@carvest.com';
@@ -40,22 +40,30 @@ export default function AdminLoginPage() {
     }
     
     try {
-        // We use a fixed email/password combination for the admin user.
-        // In a real application, this should be handled more securely,
-        // for example, by creating a custom token on a server and using signInWithCustomToken.
-        // For this project, we'll use a pre-existing admin account.
         await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
         router.push('/admin');
-
     } catch (error: any) {
-        // This can happen if the admin user doesn't exist.
-        // We could create it here, but for simplicity, we assume it's pre-created.
-        console.error("Admin sign-in error:", error);
-        toast({
-            variant: 'destructive',
-            title: 'Admin Authentication Failed',
-            description: 'Could not sign in the admin user. Please check console.',
-        });
+        if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+            try {
+                // If the user doesn't exist, create it.
+                await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
+                router.push('/admin');
+            } catch (creationError: any) {
+                 toast({
+                    variant: 'destructive',
+                    title: 'Admin Creation Failed',
+                    description: creationError.message,
+                });
+            }
+        } else {
+            console.error("Admin sign-in error:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Admin Authentication Failed',
+                description: 'Could not sign in the admin user. Please check console.',
+            });
+        }
+    } finally {
         setIsLoading(false);
     }
   };
