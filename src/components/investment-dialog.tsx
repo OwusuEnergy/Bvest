@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { authLinks } from '@/lib/constants';
@@ -77,16 +77,21 @@ export function InvestmentDialog({ car }: { car: Car }) {
     setIsLoading(true);
 
     try {
-      // 1. Deduct from balance
       const newBalance = userProfile.balance - selectedPlan.amount;
+      
+      const batch = writeBatch(firestore);
+
+      // 1. Deduct from balance
       const userDocRef = doc(firestore, 'users', user.uid);
-      await updateDoc(userDocRef, { balance: newBalance });
+      batch.update(userDocRef, { balance: newBalance });
       
       // 2. Create investment record
-      const investmentsCol = collection(firestore, `users/${user.uid}/investments`);
-      await addDoc(investmentsCol, {
+      const investmentsColRef = collection(firestore, `users/${user.uid}/investments`);
+      const newInvestmentRef = doc(investmentsColRef); // Create a ref to get the ID
+      batch.set(newInvestmentRef, {
         userId: user.uid,
         carId: car.id,
+        carName: car.name,
         amount: selectedPlan.amount,
         duration: 12, // Default duration, can be customized
         roi: car.roi,
@@ -97,6 +102,20 @@ export function InvestmentDialog({ car }: { car: Car }) {
         totalProfit: 0,
         createdAt: serverTimestamp(),
       });
+      
+      // 3. Create transaction record
+      const transactionsColRef = collection(firestore, `users/${user.uid}/transactions`);
+      const newTransactionRef = doc(transactionsColRef);
+      batch.set(newTransactionRef, {
+        userId: user.uid,
+        type: 'Investment',
+        amount: selectedPlan.amount,
+        balanceAfter: newBalance,
+        description: `Investment in ${car.name}`,
+        createdAt: serverTimestamp(),
+      });
+
+      await batch.commit();
 
       setIsSuccess(true);
       // Reset after a delay

@@ -20,14 +20,12 @@ import {
   Users,
   TrendingUp,
   Wallet,
-  ArrowLeftRight,
 } from "lucide-react";
-import { Cedi } from "@/components/cedi-icon";
 import { Badge } from "@/components/ui/badge";
-import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { doc } from "firebase/firestore";
+import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
+import { collection, doc, query, orderBy, Timestamp, limit } from "firebase/firestore";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { format, differenceInDays, addMonths, parseISO } from 'date-fns';
+import { format, differenceInDays, addMonths, parseISO, formatDistanceToNow } from 'date-fns';
 import { Progress } from "@/components/ui/progress";
 
 const recentReferrals = [
@@ -35,12 +33,6 @@ const recentReferrals = [
     { name: 'Ama Serwaa', level: 2, earnings: 'GH₵ 15.50', status: 'Active', date: '1 day ago' },
     { name: 'Esi Nana', level: 1, earnings: 'GH₵ 75.00', status: 'Active', date: '5 hours ago' },
     { name: 'Kwame Addo', level: 3, earnings: 'GH₵ 5.00', status: 'Pending', date: '3 days ago' },
-];
-
-const investments = [
-  { id: 'INV-001', car: 'Standard SUV (SUV-01)', amount: 5000, roi: 12, startDate: '2023-11-01', duration: 12, status: 'Active' },
-  { id: 'INV-002', car: 'Economy Sedan (SEDAN-01)', amount: 2000, roi: 9.5, startDate: '2024-02-15', duration: 6, status: 'Active' },
-  { id: 'INV-003', car: 'Luxury Sportscar (LUX-01)', amount: 10000, roi: 15, startDate: '2023-08-20', duration: 12, status: 'Matured' },
 ];
 
 const profitData = [
@@ -51,14 +43,6 @@ const profitData = [
   { date: 'May', profit: 210 },
   { date: 'Jun', profit: 200 },
 ];
-
-const recentTransactions = [
-    { id: 'TXN-001', type: 'Deposit', amount: 'GH₵ 500.00', status: 'Completed', date: '3 days ago' },
-    { id: 'TXN-002', type: 'Investment', amount: 'GH₵ 2000.00', status: 'Completed', date: '2 days ago' },
-    { id: 'TXN-003', type: 'Withdrawal', amount: 'GH₵ 150.00', status: 'Pending', date: '1 day ago' },
-    { id: 'TXN-004', type: 'Profit', amount: 'GH₵ 12.50', status: 'Completed', date: '5 hours ago' },
-];
-
 
 export default function DashboardPage() {
   const { user } = useUser();
@@ -71,9 +55,25 @@ export default function DashboardPage() {
 
   const { data: userProfile } = useDoc<{balance: number, totalEarned: number}>(userProfileRef);
 
+  const investmentsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(collection(firestore, `users/${user.uid}/investments`), orderBy('createdAt', 'desc'));
+  }, [firestore, user]);
+
+  const { data: investments } = useCollection(investmentsQuery);
+
+  const transactionsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(collection(firestore, `users/${user.uid}/transactions`), orderBy('createdAt', 'desc'), limit(5));
+  }, [firestore, user]);
+
+  const { data: recentTransactions } = useCollection(transactionsQuery);
+
   const formatCurrency = (amount: number = 0) => {
     return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS', currencyDisplay: 'symbol' }).format(amount);
   }
+
+  const totalInvestments = investments?.reduce((acc, inv) => acc + inv.amount, 0) || 0;
 
   const statsCards = [
     {
@@ -83,7 +83,7 @@ export default function DashboardPage() {
     },
     {
       title: "Total Investments",
-      amount: "GH₵ 50,000.00", // This would also come from user data
+      amount: formatCurrency(totalInvestments),
       icon: Wallet,
     },
     {
@@ -97,6 +97,16 @@ export default function DashboardPage() {
       icon: Users,
     },
   ];
+
+  const formatDateFromTimestamp = (timestamp: Timestamp) => {
+    if (!timestamp) return 'N/A';
+    return format(timestamp.toDate(), 'MMM dd, yyyy');
+  }
+
+  const formatDistanceToNowFromTimestamp = (timestamp: Timestamp) => {
+    if (!timestamp) return 'N/A';
+    return formatDistanceToNow(timestamp.toDate(), { addSuffix: true });
+  }
 
   return (
     <div className="flex flex-col gap-8 animate-fade-in-up">
@@ -191,24 +201,24 @@ export default function DashboardPage() {
                 <TableHeader>
                     <TableRow>
                     <TableHead>Car</TableHead>
-                    <TableHead>Amount (GH₵)</TableHead>
+                    <TableHead>Amount</TableHead>
                     <TableHead>Monthly ROI</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[300px]">Maturity Progress</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {investments.map((inv) => {
-                    const startDate = parseISO(inv.startDate);
-                    const endDate = addMonths(startDate, inv.duration);
+                    {investments && investments.map((inv) => {
+                    const startDate = inv.startDate.toDate();
+                    const endDate = inv.endDate.toDate();
                     const totalDays = differenceInDays(endDate, startDate);
                     const elapsedDays = differenceInDays(new Date(), startDate);
                     const progress = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
 
                     return (
                         <TableRow key={inv.id}>
-                        <TableCell className="font-medium">{inv.car}</TableCell>
-                        <TableCell>{inv.amount.toFixed(2)}</TableCell>
+                        <TableCell className="font-medium">{inv.carName || inv.carId}</TableCell>
+                        <TableCell>{formatCurrency(inv.amount)}</TableCell>
                         <TableCell>{inv.roi}%</TableCell>
                         <TableCell>
                             <Badge variant={inv.status === 'Active' ? 'default' : 'secondary'}>{inv.status}</Badge>
@@ -227,6 +237,11 @@ export default function DashboardPage() {
                         </TableRow>
                     );
                     })}
+                     {(!investments || investments.length === 0) && (
+                        <TableRow>
+                            <TableCell colSpan={5} className="text-center h-24">You have no investments yet.</TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
                 </Table>
             </CardContent>
@@ -246,23 +261,28 @@ export default function DashboardPage() {
                         <TableRow>
                         <TableHead>Type</TableHead>
                         <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
+                        <TableHead>Description</TableHead>
                         <TableHead>Date</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {recentTransactions.map((txn, i) => (
-                        <TableRow key={i}>
-                            <TableCell className="font-medium">{txn.type}</TableCell>
-                            <TableCell>{txn.amount}</TableCell>
+                        {recentTransactions && recentTransactions.map((txn, i) => (
+                        <TableRow key={txn.id}>
                             <TableCell>
-                            <Badge variant={txn.status === 'Completed' ? 'default' : 'secondary'}>
-                                {txn.status}
-                            </Badge>
+                                <Badge variant={txn.type === 'Investment' ? 'secondary' : 'default'}>
+                                    {txn.type}
+                                </Badge>
                             </TableCell>
-                            <TableCell className="text-muted-foreground">{txn.date}</TableCell>
+                            <TableCell className="font-medium">{formatCurrency(txn.amount)}</TableCell>
+                            <TableCell>{txn.description}</TableCell>
+                            <TableCell className="text-muted-foreground">{formatDistanceToNowFromTimestamp(txn.createdAt)}</TableCell>
                         </TableRow>
                         ))}
+                         {(!recentTransactions || recentTransactions.length === 0) && (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center h-24">You have no recent transactions.</TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                     </Table>
                 </CardContent>
@@ -272,5 +292,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-
-    
