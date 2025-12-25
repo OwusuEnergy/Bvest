@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -30,6 +31,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import Image from 'next/image';
+import { ScrollArea } from '../ui/scroll-area';
 
 const addCarFormSchema = z.object({
   name: z.string().min(1, 'Car name is required.'),
@@ -105,93 +107,94 @@ export function AddCarDialog() {
             Fill in the details of the new car to make it available for investment.
           </DialogDescription>
         </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Car Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g., Toyota Camry 2023" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="A short description of the car..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="grid grid-cols-2 gap-4">
-                <FormField
-                    control={form.control}
-                    name="totalValue"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Total Value (GHS)</FormLabel>
-                        <FormControl>
-                            <Input type="number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-                <FormField
-                    control={form.control}
-                    name="roi"
-                    render={({ field }) => (
-                        <FormItem>
-                        <FormLabel>Monthly ROI (%)</FormLabel>
-                        <FormControl>
-                            <Input type="number" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                        </FormItem>
-                    )}
-                />
-            </div>
-             <FormField
+        <ScrollArea className="max-h-[70vh] p-1">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 p-4">
+              <FormField
                 control={form.control}
-                name="image"
+                name="name"
                 render={({ field }) => (
-                    <FormItem>
-                        <FormLabel>Car Image URL</FormLabel>
-                        <FormControl>
-                            <Input placeholder="https://example.com/image.png" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                    </FormItem>
+                  <FormItem>
+                    <FormLabel>Car Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g., Toyota Camry 2023" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
                 )}
-            />
+              />
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea placeholder="A short description of the car..." {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                      control={form.control}
+                      name="totalValue"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Total Value (GHS)</FormLabel>
+                          <FormControl>
+                              <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+                  <FormField
+                      control={form.control}
+                      name="roi"
+                      render={({ field }) => (
+                          <FormItem>
+                          <FormLabel>Monthly ROI (%)</FormLabel>
+                          <FormControl>
+                              <Input type="number" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                          </FormItem>
+                      )}
+                  />
+              </div>
+              <FormField
+                  control={form.control}
+                  name="image"
+                  render={({ field }) => (
+                      <FormItem>
+                          <FormLabel>Car Image URL</FormLabel>
+                          <FormControl>
+                              <Input placeholder="https://example.com/image.png" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                      </FormItem>
+                  )}
+              />
 
-            {isUrlValid && (
-                <div className="relative h-40 w-full rounded-md border">
-                    <Image src={imageUrl} alt="Car preview" fill className="object-cover rounded-md" />
-                </div>
-            )}
-
-            <DialogFooter className="pt-4">
-              <DialogClose asChild>
-                <Button variant="outline" type="button">Cancel</Button>
-              </DialogClose>
-              <Button type="submit" disabled={isLoading}>
-                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Add Car
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+              {isUrlValid && (
+                  <div className="relative h-40 w-full rounded-md border">
+                      <Image src={imageUrl} alt="Car preview" fill className="object-cover rounded-md" />
+                  </div>
+              )}
+              <DialogFooter className="pt-4">
+                <DialogClose asChild>
+                  <Button variant="outline" type="button">Cancel</Button>
+                </DialogClose>
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  Add Car
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
+        </ScrollArea>
       </DialogContent>
     </Dialog>
   );
