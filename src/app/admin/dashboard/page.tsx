@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection } from 'firebase/firestore';
 import { Car, Users, Wallet } from 'lucide-react';
+import type { User } from '@/lib/types';
 
 export default function AdminDashboardPage() {
   const firestore = useFirestore();
@@ -20,7 +21,7 @@ export default function AdminDashboardPage() {
      if (!firestore) return null;
     return collection(firestore, 'users');
   }, [firestore]);
-  const { data: users } = useCollection(usersQuery);
+  const { data: users } = useCollection<User>(usersQuery);
 
   const totalInvested = users?.reduce((sum, user) => sum + (user.totalInvested || 0), 0) || 0;
 
