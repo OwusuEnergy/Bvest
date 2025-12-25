@@ -51,11 +51,11 @@ const statsCards = [
   },
 ];
 
-const recentTransactions = [
-    { type: 'Investment', amount: 'GHS 5,000.00', status: 'Completed', date: '2 days ago' },
-    { type: 'Profit', amount: 'GHS 50.20', status: 'Credited', date: '1 day ago' },
-    { type: 'Withdrawal', amount: 'GHS 1,000.00', status: 'Pending', date: '5 hours ago' },
-    { type: 'Referral', amount: 'GHS 15.00', status: 'Credited', date: '3 days ago' },
+const recentReferrals = [
+    { name: 'Kofi Mensah', level: 1, earnings: 'GHS 50.00', status: 'Active', date: '2 days ago' },
+    { name: 'Ama Serwaa', level: 2, earnings: 'GHS 15.50', status: 'Active', date: '1 day ago' },
+    { name: 'Esi Nana', level: 1, earnings: 'GHS 75.00', status: 'Active', date: '5 hours ago' },
+    { name: 'Kwame Addo', level: 3, earnings: 'GHS 5.00', status: 'Pending', date: '3 days ago' },
 ];
 
 const portfolioData = [
@@ -84,32 +84,34 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3 animate-fade-in-up" style={{animationDelay: '400ms'}}>
           <CardHeader>
-            <CardTitle className="font-headline">Recent Transactions</CardTitle>
+            <CardTitle className="font-headline">Total Referrals</CardTitle>
             <CardDescription>
-              A quick look at your latest activities.
+              A quick look at your referral network.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Amount</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Level</TableHead>
+                  <TableHead>Earnings</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>Date Joined</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentTransactions.map((tx, i) => (
+                {recentReferrals.map((ref, i) => (
                   <TableRow key={i}>
-                    <TableCell className="font-medium">{tx.type}</TableCell>
-                    <TableCell>{tx.amount}</TableCell>
+                    <TableCell className="font-medium">{ref.name}</TableCell>
+                    <TableCell>Level {ref.level}</TableCell>
+                    <TableCell>{ref.earnings}</TableCell>
                     <TableCell>
-                      <Badge variant={tx.status === 'Completed' || tx.status === 'Credited' ? 'default' : 'secondary'}>
-                        {tx.status}
+                      <Badge variant={ref.status === 'Active' ? 'default' : 'secondary'}>
+                        {ref.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-muted-foreground">{tx.date}</TableCell>
+                    <TableCell className="text-muted-foreground">{ref.date}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
