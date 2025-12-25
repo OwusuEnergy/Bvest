@@ -1,8 +1,13 @@
+'use client';
+
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { authLinks } from '@/lib/constants';
+import { useUser } from '@/firebase';
 
 export function Cta() {
+  const { user, isUserLoading } = useUser();
+
   return (
     <section className="py-12 sm:py-16">
       <div className="container">
@@ -13,11 +18,13 @@ export function Cta() {
           <p className="mt-4 text-lg text-primary-foreground/80">
             Create your account in minutes and make your first investment today.
           </p>
-          <div className="mt-8">
-            <Button size="lg" variant="secondary" asChild className="animate-fade-in" style={{animationDelay: '0.5s'}}>
-              <Link href={authLinks.signup}>Join BVest Now</Link>
-            </Button>
-          </div>
+          {!isUserLoading && !user && (
+            <div className="mt-8">
+              <Button size="lg" variant="secondary" asChild className="animate-fade-in" style={{animationDelay: '0.5s'}}>
+                <Link href={authLinks.signup}>Join BVest Now</Link>
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </section>
