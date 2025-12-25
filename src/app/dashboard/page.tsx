@@ -23,29 +23,8 @@ import {
 } from "lucide-react";
 import { Cedi } from "@/components/cedi-icon";
 import { Badge } from "@/components/ui/badge";
-
-const statsCards = [
-  {
-    title: "Total Balance",
-    amount: "GHS 12,345.67",
-    icon: Wallet,
-  },
-  {
-    title: "Total Investments",
-    amount: "GHS 50,000.00",
-    icon: Cedi,
-  },
-  {
-    title: "Total Profit",
-    amount: "GHS 2,345.67",
-    icon: TrendingUp,
-  },
-  {
-    title: "Referral Earnings",
-    amount: "GHS 500.00",
-    icon: Users,
-  },
-];
+import { useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
+import { doc } from "firebase/firestore";
 
 const recentReferrals = [
     { name: 'Kofi Mensah', level: 1, earnings: 'GHS 50.00', status: 'Active', date: '2 days ago' },
@@ -55,6 +34,43 @@ const recentReferrals = [
 ];
 
 export default function DashboardPage() {
+  const { user } = useUser();
+  const firestore = useFirestore();
+
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile } = useDoc<{balance: number, totalEarned: number}>(userProfileRef);
+
+  const formatCurrency = (amount: number = 0) => {
+    return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
+  }
+
+  const statsCards = [
+    {
+      title: "Total Balance",
+      amount: formatCurrency(userProfile?.balance),
+      icon: Wallet,
+    },
+    {
+      title: "Total Investments",
+      amount: "GHS 50,000.00", // This would also come from user data
+      icon: Cedi,
+    },
+    {
+      title: "Total Profit",
+      amount: formatCurrency(userProfile?.totalEarned),
+      icon: TrendingUp,
+    },
+    {
+      title: "Referral Earnings",
+      amount: "GHS 500.00", // This would also come from user data
+      icon: Users,
+    },
+  ];
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

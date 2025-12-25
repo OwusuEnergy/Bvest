@@ -36,10 +36,11 @@ import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DepositDialog } from "@/components/deposit-dialog";
-import { useAuth, useUser } from "@/firebase";
+import { useAuth, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { authLinks } from "@/lib/constants";
 import { signOut } from "firebase/auth";
 import { useEffect } from "react";
+import { doc } from "firebase/firestore";
 
 const sidebarNav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -63,7 +64,15 @@ export default function DashboardLayout({
   const router = useRouter();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
   const avatar = PlaceHolderImages.find((img) => img.id === 'avatar-1');
+
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile } = useDoc(userProfileRef);
 
   useEffect(() => {
     if (!isUserLoading && !user) {
@@ -94,6 +103,10 @@ export default function DashboardLayout({
        return nameParts[0][0];
     }
     return '';
+  }
+
+  const formatCurrency = (amount: number = 0) => {
+    return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
   }
 
   return (
@@ -175,7 +188,7 @@ export default function DashboardLayout({
              <div className="flex items-center gap-4">
               <div className="hidden sm:flex items-center gap-2">
                 <Wallet className="h-5 w-5 text-muted-foreground" />
-                <span className="font-semibold">GHS 12,345.67</span>
+                <span className="font-semibold">{formatCurrency(userProfile?.balance)}</span>
               </div>
               <Button asChild variant="outline">
                 <Link href="/dashboard/withdraw">Withdraw</Link>

@@ -30,15 +30,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth } from '@/firebase';
+import { useAuth, useFirestore } from '@/firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  updateProfile,
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -56,6 +58,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const auth = useAuth();
+  const firestore = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
@@ -88,8 +91,25 @@ export default function LoginPage() {
   const handleSignup = async (values: z.infer<typeof signupSchema>) => {
     setIsLoading(true);
     try {
-      await createUserWithEmailAndPassword(auth, values.email, values.password);
-      // You might want to update profile with name here later
+      const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
+      const user = userCredential.user;
+
+      // Update Firebase Auth profile
+      await updateProfile(user, { displayName: values.name });
+
+      // Create user document in Firestore
+      const userDocRef = doc(firestore, 'users', user.uid);
+      await setDoc(userDocRef, {
+        id: user.uid,
+        name: values.name,
+        email: values.email,
+        balance: 0,
+        totalEarned: 0,
+        referralCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
+      });
+
       router.push(authLinks.dashboard);
     } catch (error: any) {
       toast({

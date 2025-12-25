@@ -14,17 +14,30 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, LogOut } from 'lucide-react';
-import { useUser, useAuth } from '@/firebase';
+import { ChevronDown, LogOut, Wallet } from 'lucide-react';
+import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { PlaceHolderImages } from '@/lib/placeholder-images';
+import { doc } from 'firebase/firestore';
 
 export function Header() {
   const pathname = usePathname();
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
+  const firestore = useFirestore();
   const avatar = PlaceHolderImages.find((img) => img.id === 'avatar-1');
+
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile } = useDoc<{balance: number}>(userProfileRef);
+
+  const formatCurrency = (amount: number = 0) => {
+    return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
+  }
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -33,10 +46,13 @@ export function Header() {
   const getInitials = (name?: string | null) => {
     if (!name) return '';
     const nameParts = name.split(' ');
-    if (nameParts.length > 1) {
+    if (nameParts.length > 1 && nameParts[0] && nameParts[nameParts.length-1]) {
       return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`;
     }
-    return name[0];
+    if (nameParts[0]){
+      return nameParts[0][0];
+    }
+    return '';
   }
 
   return (
@@ -89,6 +105,10 @@ export function Header() {
               <div className='w-[180px] h-10 bg-muted rounded-md animate-pulse' />
             ) : user ? (
               <>
+                 <div className="flex items-center gap-2 border-r pr-4 mr-2">
+                  <Wallet className="h-5 w-5 text-muted-foreground" />
+                  <span className="font-semibold">{formatCurrency(userProfile?.balance)}</span>
+                </div>
                 <Button variant="outline" asChild>
                   <Link href={authLinks.dashboard}>Dashboard</Link>
                 </Button>
