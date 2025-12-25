@@ -76,17 +76,17 @@ service cloud.firestore {
 
     /**
      * @description Manages user profile documents. Users can create their own profile,
-     *   and can only read or write to their own document thereafter.
+     *   and can only read or write to their own document thereafter. Admins have full access.
      * @path /users/{userId}
      * @allow (create) An authenticated user creating their own profile document. `request.auth.uid == userId`.
-     * @allow (list) Allows querying for a user by their referral code.
+     * @allow (list) Allows querying for a user by their referral code or allows admins to list all users.
      * @deny (get) A user trying to read another user's profile. `request.auth.uid != userId`.
-     * @deny (list) Any user trying to list all documents in the `/users` collection without a specific filter.
-     * @principle Enforces strict self-service and ownership for user profiles and prevents user enumeration.
+     * @deny (list) Any non-admin user trying to list all documents in the `/users` collection without a specific filter.
+     * @principle Enforces strict self-service and ownership for user profiles and prevents user enumeration for non-admins.
      */
     match /users/{userId} {
       allow get: if isOwner(userId) || isAdmin();
-      allow list: if request.query.keys().hasOnly(['where', 'limit']) && request.query.where[0][0] == 'referralCode';
+      allow list: if (request.query.keys().hasOnly(['where', 'limit']) && request.query.where[0][0] == 'referralCode') || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isOwner(userId) || isAdmin();
       allow delete: if isOwner(userId) || isAdmin();
