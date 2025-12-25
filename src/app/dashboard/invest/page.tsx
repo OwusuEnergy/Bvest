@@ -1,5 +1,3 @@
-import { RoiCalculator } from "@/components/roi-calculator";
-
 export default function InvestPage() {
   return (
     <div>
@@ -7,7 +5,7 @@ export default function InvestPage() {
             Make a New Investment
         </h1>
         <div className="max-w-2xl mx-auto">
-            <RoiCalculator />
+            {/* Investment form will go here */}
         </div>
     </div>
   );

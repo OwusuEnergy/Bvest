@@ -1,4 +1,3 @@
-import { RoiCalculator } from "@/components/roi-calculator";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
@@ -25,53 +24,45 @@ export default function InvestmentsPage() {
         </p>
       </div>
 
-      <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-3">
-        <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {cars.map((car, index) => {
-                    const carImage = PlaceHolderImages.find(img => img.id === car.imageId);
-                    const investmentProgress = (car.investedAmount / car.totalValue) * 100;
-                    return (
-                        <Card key={car.id} className="animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
-                            <CardHeader className="p-0">
-                                <div className="relative h-48 w-full">
-                                    {carImage && (
-                                        <Image 
-                                            src={carImage.imageUrl}
-                                            alt={car.name}
-                                            fill
-                                            className="object-cover rounded-t-lg"
-                                            data-ai-hint={carImage.imageHint}
-                                        />
-                                    )}
-                                    <Badge variant="secondary" className="absolute top-2 right-2">{car.roi}% ROI</Badge>
+      <div className="mt-12">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {cars.map((car, index) => {
+                const carImage = PlaceHolderImages.find(img => img.id === car.imageId);
+                const investmentProgress = (car.investedAmount / car.totalValue) * 100;
+                return (
+                    <Card key={car.id} className="animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
+                        <CardHeader className="p-0">
+                            <div className="relative h-48 w-full">
+                                {carImage && (
+                                    <Image 
+                                        src={carImage.imageUrl}
+                                        alt={car.name}
+                                        fill
+                                        className="object-cover rounded-t-lg"
+                                        data-ai-hint={carImage.imageHint}
+                                    />
+                                )}
+                                <Badge variant="secondary" className="absolute top-2 right-2">{car.roi}% ROI</Badge>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-4">
+                            <CardTitle className="font-headline text-lg mb-2">{car.name}</CardTitle>
+                            <div className="text-sm text-muted-foreground">
+                                <p>Invested: {investmentProgress.toFixed(0)}%</p>
+                                <div className="w-full bg-muted rounded-full h-2 my-2">
+                                    <div className="bg-primary h-2 rounded-full" style={{width: `${investmentProgress}%`}}></div>
                                 </div>
-                            </CardHeader>
-                            <CardContent className="p-4">
-                                <CardTitle className="font-headline text-lg mb-2">{car.name}</CardTitle>
-                                <div className="text-sm text-muted-foreground">
-                                    <p>Invested: {investmentProgress.toFixed(0)}%</p>
-                                    <div className="w-full bg-muted rounded-full h-2 my-2">
-                                        <div className="bg-primary h-2 rounded-full" style={{width: `${investmentProgress}%`}}></div>
-                                    </div>
-                                    <p>{car.slots} slots available</p>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="p-4">
-                                <Button asChild className="w-full" disabled={car.slots === 0}>
-                                    <Link href={`/dashboard/invest?car=${car.id}`}>{car.slots > 0 ? 'Invest Now' : 'Fully Funded'}</Link>
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                    )
-                })}
-            </div>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="sticky top-24 animate-fade-in-up" style={{animationDelay: '300ms'}}>
-            <RoiCalculator />
-          </div>
+                                <p>{car.slots} slots available</p>
+                            </div>
+                        </CardContent>
+                        <CardFooter className="p-4">
+                            <Button asChild className="w-full" disabled={car.slots === 0}>
+                                <Link href={`/dashboard/invest?car=${car.id}`}>{car.slots > 0 ? 'Invest Now' : 'Fully Funded'}</Link>
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                )
+            })}
         </div>
       </div>
     </div>
