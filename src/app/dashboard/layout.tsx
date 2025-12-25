@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
-  CircleDollarSign,
   CandlestickChart,
   Users,
   Banknote,
@@ -24,6 +24,7 @@ import {
   LogOut,
   Menu,
 } from "lucide-react";
+import { Cedi } from "@/components/cedi-icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -35,7 +36,7 @@ import { ThemeToggle } from "@/components/theme-toggle";
 
 const sidebarNav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Invest", href: "/dashboard/invest", icon: CircleDollarSign },
+  { name: "Invest", href: "/dashboard/invest", icon: Cedi },
   { name: "My Investments", href: "/dashboard/investments", icon: CandlestickChart },
   { name: "Referrals", href: "/dashboard/referrals", icon: Users },
   { name: "Withdraw", href: "/dashboard/withdraw", icon: Banknote },
@@ -44,7 +45,7 @@ const sidebarNav = [
 
 const sidebarProfileNav = [
   { name: "Profile", href: "/dashboard/profile", icon: User },
-  { name: "Security", href: "/dashboard/security", icon: Shield },
+  { name "Security", href: "/dashboard/security", icon: Shield },
 ];
 
 export default function DashboardLayout({

@@ -1,11 +1,13 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { DollarSign, Users, TrendingUp, Car } from 'lucide-react';
+import { Users, TrendingUp, Car } from 'lucide-react';
+import { Cedi } from '@/components/cedi-icon';
 
 const stats = [
   {
     name: 'Total Investment',
     value: 'GHS 5M+',
-    icon: DollarSign,
+    icon: Cedi,
   },
   {
     name: 'Happy Investors',

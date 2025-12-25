@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -17,12 +18,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  DollarSign,
   Users,
   TrendingUp,
   Wallet,
   ArrowRight,
 } from "lucide-react";
+import { Cedi } from "@/components/cedi-icon";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
@@ -36,7 +37,7 @@ const statsCards = [
   {
     title: "Total Investments",
     amount: "GHS 50,000.00",
-    icon: DollarSign,
+    icon: Cedi,
   },
   {
     title: "Total Profit",

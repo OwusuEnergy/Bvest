@@ -1,11 +1,13 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { CircleDollarSign, Users, Calculator, ShieldCheck } from 'lucide-react';
+import { Users, Calculator, ShieldCheck } from 'lucide-react';
+import { Cedi } from '@/components/cedi-icon';
 
 const features = [
   {
     title: 'Flexible Car Investments',
     description: 'Browse a curated selection of vehicles, choose your investment amount, and start earning. It\'s that simple.',
-    icon: CircleDollarSign,
+    icon: Cedi,
   },
   {
     title: 'AI-Powered ROI Calculator',
