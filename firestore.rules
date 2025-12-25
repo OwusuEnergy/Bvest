@@ -55,7 +55,7 @@ service cloud.firestore {
     }
 
     function isAdmin() {
-      return request.auth.uid == 'L29dCjetU2WAK2G5QcIWu5TrCg33';
+      return false; // Admin auth disabled
     }
 
     // --------------------------------
@@ -74,7 +74,7 @@ service cloud.firestore {
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if request.query.keys().hasOnly(['where', 'limit']) && request.query.where[0][0] == 'referralCode' || isAdmin();
+      allow list: if true; // Public read for admin dashboard
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isOwner(userId);
       allow delete: if isOwner(userId);
@@ -149,7 +149,7 @@ service cloud.firestore {
      * @principle Implements a "Public Read with Admin-Only Writes" pattern for globally shared data.
      */
     match /cars/{carId} {
-      allow get, list: if isSignedIn();
+      allow get, list: if true; // Public read access
       allow create, update, delete: if isAdmin();
     }
   }
