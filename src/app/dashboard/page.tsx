@@ -8,7 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -21,12 +20,9 @@ import {
   Users,
   TrendingUp,
   Wallet,
-  ArrowRight,
 } from "lucide-react";
 import { Cedi } from "@/components/cedi-icon";
 import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis } from "recharts";
 
 const statsCards = [
   {
@@ -58,13 +54,6 @@ const recentReferrals = [
     { name: 'Kwame Addo', level: 3, earnings: 'GHS 5.00', status: 'Pending', date: '3 days ago' },
 ];
 
-const portfolioData = [
-  { name: 'SUV-01', value: 20000 },
-  { name: 'Sedan-01', value: 15000 },
-  { name: 'Luxury-01', value: 10000 },
-  { name: 'Sedan-02', value: 5000 },
-];
-
 export default function DashboardPage() {
   return (
     <div className="flex flex-col gap-6 animate-fade-in-up">
@@ -81,8 +70,8 @@ export default function DashboardPage() {
           </Card>
         ))}
       </div>
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3 animate-fade-in-up" style={{animationDelay: '400ms'}}>
+      <div className="grid grid-cols-1 gap-6">
+        <Card className="animate-fade-in-up" style={{animationDelay: '400ms'}}>
           <CardHeader>
             <CardTitle className="font-headline">Total Referrals</CardTitle>
             <CardDescription>
@@ -116,28 +105,6 @@ export default function DashboardPage() {
                 ))}
               </TableBody>
             </Table>
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2 animate-fade-in-up" style={{animationDelay: '500ms'}}>
-          <CardHeader>
-            <CardTitle className="font-headline">Portfolio Summary</CardTitle>
-            <CardDescription>
-              Your active investment distribution.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={portfolioData} layout="vertical">
-                    <XAxis type="number" hide />
-                    <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} width={60}/>
-                    <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 4, 4]} />
-                </BarChart>
-            </ResponsiveContainer>
-            <Button variant="outline" className="w-full mt-4" asChild>
-                <Link href="/dashboard/investments">
-                    View All Investments <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-            </Button>
           </CardContent>
         </Card>
       </div>
