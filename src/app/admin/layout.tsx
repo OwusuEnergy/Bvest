@@ -31,31 +31,25 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    // Wait until the user's auth state is fully loaded
     if (isUserLoading) {
-      return;
+      return; // Wait until user status is resolved
     }
 
-    const isAdminPage = pathname.startsWith('/admin');
     const isLoginPage = pathname === '/admin/login';
 
-    // If there's no user or the user is not the admin
-    if (!user || user.uid !== ADMIN_UID) {
-      // And they are trying to access any admin page that ISN'T the login page,
-      // redirect them to the login page.
-      if (isAdminPage && !isLoginPage) {
-        router.replace('/admin/login');
+    if (user && user.uid === ADMIN_UID) {
+      // If admin is logged in and on the login page, redirect to dashboard
+      if (isLoginPage) {
+        router.replace('/admin/dashboard');
       }
     } else {
-      // If the user IS the admin and they are on the login page,
-      // redirect them to the admin dashboard.
-      if (isLoginPage) {
-        router.replace('/admin');
+      // If user is not admin and not on login page, redirect to login
+      if (!isLoginPage) {
+        router.replace('/admin/login');
       }
     }
   }, [user, isUserLoading, router, pathname]);
 
-  // While loading, show a full-screen loader to prevent content flash
   if (isUserLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -64,13 +58,12 @@ export default function AdminLayout({
     );
   }
 
-  // If on the login page, just render the children (the login form)
+  // If on the login page, just render the login form
   if (pathname === '/admin/login') {
     return <>{children}</>;
   }
 
-  // If user is loaded but is not the admin, they are being redirected.
-  // Render nothing here to prevent content flashing.
+  // If user is not the admin, they are being redirected, so render nothing.
   if (!user || user.uid !== ADMIN_UID) {
     return null;
   }

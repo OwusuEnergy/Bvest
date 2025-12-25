@@ -27,7 +27,7 @@ export default function AdminLoginPage() {
   // Redirect if admin is already logged in
   useEffect(() => {
     if (!isUserLoading && user && user.uid === ADMIN_UID) {
-      router.replace('/admin');
+      router.replace('/admin/dashboard');
     }
   }, [user, isUserLoading, router]);
 
@@ -45,19 +45,14 @@ export default function AdminLoginPage() {
 
     setIsLoading(true);
     try {
-        // Attempt to sign in first
         await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
-        router.replace('/admin'); // Use replace to avoid back button issues
+        router.replace('/admin/dashboard');
     } catch (error: any) {
-        // If user does not exist, create them
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
             try {
-                // This will fail if the UID is already taken, which is fine.
-                // We are primarily concerned with creating the admin if they don't exist.
                 await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
-                // After creation, sign in again to establish a session
                 await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
-                router.replace('/admin');
+                router.replace('/admin/dashboard');
             } catch (creationError: any) {
                  toast({
                     variant: 'destructive',

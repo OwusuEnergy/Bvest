@@ -41,7 +41,7 @@ export const footerLinks = {
 };
 
 export const adminNavLinks = [
-  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Cars", href: "/admin/cars", icon: Car },
   { name: "Users", href: "/admin/users", icon: Users },
 ];
