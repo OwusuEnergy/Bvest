@@ -32,15 +32,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 
-const profitData = [
-  { date: 'Jan', profit: 120 },
-  { date: 'Feb', profit: 150 },
-  { date: 'Mar', profit: 140 },
-  { date: 'Apr', profit: 180 },
-  { date: 'May', profit: 210 },
-  { date: 'Jun', profit: 200 },
-];
-
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
@@ -66,6 +57,40 @@ export default function DashboardPage() {
   }, [firestore, user]);
 
   const { data: recentTransactions } = useCollection(transactionsQuery);
+    
+  const allTransactionsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(collection(firestore, `users/${user.uid}/transactions`), orderBy('createdAt', 'asc'));
+  }, [firestore, user]);
+
+  const { data: allTransactions } = useCollection(allTransactionsQuery);
+
+  const chartData = useMemoFirebase(() => {
+    if (!allTransactions) return [];
+    
+    const monthlyData: {[key: string]: number} = {};
+
+    allTransactions.forEach(txn => {
+        if (txn.createdAt) {
+            const month = format(txn.createdAt.toDate(), 'MMM');
+            if (!monthlyData[month]) {
+                monthlyData[month] = 0;
+            }
+            if (txn.type === 'Referral Bonus' || txn.type === 'Profit') { // Assuming you might have a 'Profit' type
+                 monthlyData[month] += txn.amount;
+            }
+        }
+    });
+
+    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    
+    return monthOrder.map(month => ({
+        date: month,
+        profit: monthlyData[month] || 0
+    })).filter(d => d.profit > 0);
+
+  }, [allTransactions]);
+
 
   const referralsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -145,11 +170,11 @@ export default function DashboardPage() {
              <Card>
                 <CardHeader>
                   <CardTitle className="font-headline">Monthly Profit</CardTitle>
-                  <CardDescription>Your profit earnings over the last 6 months.</CardDescription>
+                  <CardDescription>Your profit earnings over the last months.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
-                    <AreaChart data={profitData}>
+                    <AreaChart data={chartData}>
                       <defs>
                         <linearGradient id="colorProfit" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
@@ -199,53 +224,55 @@ export default function DashboardPage() {
                 <CardDescription>A list of all your investments, active and matured.</CardDescription>
             </CardHeader>
             <CardContent>
-                <Table>
-                <TableHeader>
-                    <TableRow>
-                    <TableHead>Car</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Monthly ROI</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="w-[300px]">Maturity Progress</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {investments && investments.map((inv) => {
-                    const startDate = inv.startDate.toDate();
-                    const endDate = inv.endDate.toDate();
-                    const totalDays = differenceInDays(endDate, startDate);
-                    const elapsedDays = differenceInDays(new Date(), startDate);
-                    const progress = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
-
-                    return (
-                        <TableRow key={inv.id}>
-                        <TableCell className="font-medium">{inv.carName || inv.carId}</TableCell>
-                        <TableCell>{formatCurrency(inv.amount)}</TableCell>
-                        <TableCell>{inv.roi}%</TableCell>
-                        <TableCell>
-                            <Badge variant={inv.status === 'Active' ? 'default' : 'secondary'}>{inv.status}</Badge>
-                        </TableCell>
-                        <TableCell>
-                            <div className="flex items-center gap-4">
-                            <Progress value={progress} className="h-2 w-[150px]" />
-                            <span className="text-xs text-muted-foreground">
-                                {inv.status === 'Matured' ? 'Completed' : `${Math.round(progress)}%`}
-                            </span>
-                            </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                            Ends {format(endDate, 'MMM dd, yyyy')}
-                            </p>
-                        </TableCell>
-                        </TableRow>
-                    );
-                    })}
-                     {(!investments || investments.length === 0) && (
+                <div className="overflow-x-auto">
+                    <Table>
+                    <TableHeader>
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center h-24">You have no investments yet.</TableCell>
+                        <TableHead>Car</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Monthly ROI</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="min-w-[300px]">Maturity Progress</TableHead>
                         </TableRow>
-                    )}
-                </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {investments && investments.map((inv) => {
+                        const startDate = inv.startDate.toDate();
+                        const endDate = inv.endDate.toDate();
+                        const totalDays = differenceInDays(endDate, startDate);
+                        const elapsedDays = differenceInDays(new Date(), startDate);
+                        const progress = Math.min(100, Math.max(0, (elapsedDays / totalDays) * 100));
+
+                        return (
+                            <TableRow key={inv.id}>
+                            <TableCell className="font-medium">{inv.carName || inv.carId}</TableCell>
+                            <TableCell>{formatCurrency(inv.amount)}</TableCell>
+                            <TableCell>{inv.roi}%</TableCell>
+                            <TableCell>
+                                <Badge variant={inv.status === 'Active' ? 'default' : 'secondary'}>{inv.status}</Badge>
+                            </TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-4">
+                                <Progress value={progress} className="h-2 w-[150px]" />
+                                <span className="text-xs text-muted-foreground">
+                                    {inv.status === 'Matured' ? 'Completed' : `${Math.round(progress)}%`}
+                                </span>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                Ends {format(endDate, 'MMM dd, yyyy')}
+                                </p>
+                            </TableCell>
+                            </TableRow>
+                        );
+                        })}
+                         {(!investments || investments.length === 0) && (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center h-24">You have no investments yet.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                    </Table>
+                </div>
             </CardContent>
         </Card>
        </div>
@@ -258,35 +285,37 @@ export default function DashboardPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                    <TableHeader>
-                        <TableRow>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Description</TableHead>
-                        <TableHead>Date</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {recentTransactions && recentTransactions.map((txn, i) => (
-                        <TableRow key={txn.id}>
-                            <TableCell>
-                                <Badge variant={txn.type === 'Investment' ? 'secondary' : (txn.type === 'Referral Bonus' ? 'default' : 'outline')}>
-                                    {txn.type}
-                                </Badge>
-                            </TableCell>
-                            <TableCell className={`font-medium ${txn.type === 'Referral Bonus' ? 'text-green-500' : ''}`}>{formatCurrency(txn.amount)}</TableCell>
-                            <TableCell>{txn.description}</TableCell>
-                            <TableCell className="text-muted-foreground">{formatDistanceToNowFromTimestamp(txn.createdAt)}</TableCell>
-                        </TableRow>
-                        ))}
-                         {(!recentTransactions || recentTransactions.length === 0) && (
+                    <div className="overflow-x-auto">
+                        <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center h-24">You have no recent transactions.</TableCell>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Amount</TableHead>
+                            <TableHead>Description</TableHead>
+                            <TableHead>Date</TableHead>
                             </TableRow>
-                        )}
-                    </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {recentTransactions && recentTransactions.map((txn, i) => (
+                            <TableRow key={txn.id}>
+                                <TableCell>
+                                    <Badge variant={txn.type === 'Investment' ? 'secondary' : (txn.type === 'Referral Bonus' ? 'default' : 'outline')}>
+                                        {txn.type}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className={`font-medium ${txn.type === 'Referral Bonus' ? 'text-green-500' : ''}`}>{formatCurrency(txn.amount)}</TableCell>
+                                <TableCell>{txn.description}</TableCell>
+                                <TableCell className="text-muted-foreground">{formatDistanceToNowFromTimestamp(txn.createdAt)}</TableCell>
+                            </TableRow>
+                            ))}
+                             {(!recentTransactions || recentTransactions.length === 0) && (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center h-24">You have no recent transactions.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
        </div>
@@ -299,31 +328,33 @@ export default function DashboardPage() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Table>
-                    <TableHeader>
-                        <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Date Joined</TableHead>
-                        <TableHead>Total Earned</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {referrals && referrals.map((ref, i) => (
-                        <TableRow key={ref.id}>
-                            <TableCell className="font-medium">{ref.referredName}</TableCell>
-                            <TableCell>{ref.referredEmail}</TableCell>
-                            <TableCell>{formatDateFromTimestamp(ref.createdAt)}</TableCell>
-                            <TableCell>{formatCurrency(ref.earned)}</TableCell>
-                        </TableRow>
-                        ))}
-                         {(!referrals || referrals.length === 0) && (
+                    <div className="overflow-x-auto">
+                        <Table>
+                        <TableHeader>
                             <TableRow>
-                                <TableCell colSpan={4} className="text-center h-24">You have not referred anyone yet.</TableCell>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Date Joined</TableHead>
+                            <TableHead>Total Earned</TableHead>
                             </TableRow>
-                        )}
-                    </TableBody>
-                    </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {referrals && referrals.map((ref, i) => (
+                            <TableRow key={ref.id}>
+                                <TableCell className="font-medium">{ref.referredName}</TableCell>
+                                <TableCell>{ref.referredEmail}</TableCell>
+                                <TableCell>{formatDateFromTimestamp(ref.createdAt)}</TableCell>
+                                <TableCell>{formatCurrency(ref.earned)}</TableCell>
+                            </TableRow>
+                            ))}
+                             {(!referrals || referrals.length === 0) && (
+                                <TableRow>
+                                    <TableCell colSpan={4} className="text-center h-24">You have not referred anyone yet.</TableCell>
+                                </TableRow>
+                            )}
+                        </TableBody>
+                        </Table>
+                    </div>
                 </CardContent>
             </Card>
        </div>
