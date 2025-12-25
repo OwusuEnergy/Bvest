@@ -14,8 +14,8 @@ import {
   DialogClose,
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
-import { useAuth, useFirestore, useUser } from '@/firebase';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { useAuth, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
+import { addDoc, collection, doc, serverTimestamp, updateDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { authLinks } from '@/lib/constants';
@@ -40,6 +40,13 @@ export function InvestmentDialog({ car }: { car: Car }) {
   const { toast } = useToast();
   const router = useRouter();
 
+  const userProfileRef = useMemoFirebase(() => {
+    if (!firestore || !user) return null;
+    return doc(firestore, 'users', user.uid);
+  }, [firestore, user]);
+
+  const { data: userProfile } = useDoc<{balance: number}>(userProfileRef);
+
   const handleInvest = async () => {
     if (!user) {
       toast({
@@ -58,10 +65,24 @@ export function InvestmentDialog({ car }: { car: Car }) {
       });
       return;
     }
+    if (!userProfile || (userProfile.balance < selectedPlan.amount)) {
+      toast({
+        variant: 'destructive',
+        title: 'Insufficient Funds',
+        description: 'You do not have enough balance to make this investment. Please deposit funds first.',
+      });
+      return;
+    }
 
     setIsLoading(true);
 
     try {
+      // 1. Deduct from balance
+      const newBalance = userProfile.balance - selectedPlan.amount;
+      const userDocRef = doc(firestore, 'users', user.uid);
+      await updateDoc(userDocRef, { balance: newBalance });
+      
+      // 2. Create investment record
       const investmentsCol = collection(firestore, `users/${user.uid}/investments`);
       await addDoc(investmentsCol, {
         userId: user.uid,
@@ -74,6 +95,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
         status: 'Active',
         dailyProfit: 0, // Should be calculated by a backend process
         totalProfit: 0,
+        createdAt: serverTimestamp(),
       });
 
       setIsSuccess(true);
@@ -98,7 +120,13 @@ export function InvestmentDialog({ car }: { car: Car }) {
   const isButtonDisabled = car.slots === 0;
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(isOpen) => {
+      setOpen(isOpen);
+      if (!isOpen) {
+        setIsSuccess(false);
+        setSelectedPlan(null);
+      }
+    }}>
       <DialogTrigger asChild>
         <Button className="w-full" disabled={isButtonDisabled}>
           {isButtonDisabled ? 'Fully Funded' : 'Invest Now'}
