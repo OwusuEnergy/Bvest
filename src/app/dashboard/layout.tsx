@@ -109,11 +109,11 @@ export default function DashboardLayout({
             )}>
               <Avatar className="h-8 w-8">
                   {avatar && <AvatarImage src={avatar.imageUrl} alt="User Avatar" />}
-                  <AvatarFallback>JD</AvatarFallback>
+                  <AvatarFallback>U</AvatarFallback>
               </Avatar>
               <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                  <span className="font-semibold text-foreground">John Doe</span>
-                  <span className="text-xs text-muted-foreground">john.doe@email.com</span>
+                  <span className="font-semibold text-foreground">User</span>
+                  <span className="text-xs text-muted-foreground">user@email.com</span>
               </div>
           </div>
 
