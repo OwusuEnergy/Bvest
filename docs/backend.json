@@ -350,6 +350,20 @@
         "balanceAfter",
         "createdAt"
       ]
+    },
+    "adminRole": {
+      "title": "Admin Role",
+      "type": "object",
+      "description": "A document indicating a user has admin privileges.",
+      "properties": {
+        "isAdmin": {
+          "type": "boolean",
+          "description": "Must be true for the user to be an admin."
+        }
+      },
+      "required": [
+        "isAdmin"
+      ]
     }
   },
   "auth": {

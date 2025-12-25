@@ -1,3 +1,6 @@
+
+import { LayoutDashboard, Car, Users } from 'lucide-react';
+
 type NavLink = {
   name: string;
   path?: string;
@@ -36,3 +39,9 @@ export const footerLinks = {
     { name: 'FAQ', path: '/faq' },
   ],
 };
+
+export const adminNavLinks = [
+  { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
+  { name: "Cars", href: "/admin/cars", icon: Car },
+  { name: "Users", href: "/admin/users", icon: Users },
+];

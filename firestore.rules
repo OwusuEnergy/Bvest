@@ -54,6 +54,10 @@ service cloud.firestore {
       return isOwner(userId) && resource != null;
     }
 
+    function isAdmin() {
+      return request.auth.uid == 'L29dCjetU2WAK2G5QcIWu5TrCg33';
+    }
+
     // --------------------------------
     // User Data Collections
     // --------------------------------
@@ -70,7 +74,7 @@ service cloud.firestore {
      */
     match /users/{userId} {
       allow get: if isOwner(userId);
-      allow list: if request.query.keys().hasOnly(['where', 'limit']) && request.query.where[0][0] == 'referralCode';
+      allow list: if request.query.keys().hasOnly(['where', 'limit']) && request.query.where[0][0] == 'referralCode' || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isOwner(userId);
       allow delete: if isOwner(userId);
@@ -146,7 +150,7 @@ service cloud.firestore {
      */
     match /cars/{carId} {
       allow get, list: if isSignedIn();
-      allow create, update, delete: if false;
+      allow create, update, delete: if isAdmin();
     }
   }
 }
