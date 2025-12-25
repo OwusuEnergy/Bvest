@@ -36,14 +36,18 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
+    
+    // This should be stored in a secure environment variable in a real application
+    function adminUID() {
+      return 'pYJb2fT8ZaRjS4eXq2tWz3fG8yH3';
+    }
 
     /**
      * Checks if the request is from a user with administrative privileges.
-     * Admin status is determined by the existence of a document in the /roles_admin collection
-     * where the document ID matches the user's UID.
+     * Admin status is determined by matching the request UID with a hardcoded admin UID.
      */
     function isAdmin() {
-      return exists(/databases/$(database)/documents/roles_admin/$(request.auth.uid));
+      return isSignedIn() && request.auth.uid == adminUID();
     }
 
     /**

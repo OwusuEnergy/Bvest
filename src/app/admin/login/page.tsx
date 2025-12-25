@@ -10,39 +10,54 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Logo } from '@/components/logo';
+import { useAuth } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 
 const ADMIN_MAGIC_CODE = '0596352632';
+const ADMIN_EMAIL = 'admin@carvest.com';
+const ADMIN_UID = 'pYJb2fT8ZaRjS4eXq2tWz3fG8yH3';
+
 
 export default function AdminLoginPage() {
   const [code, setCode] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuth();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate network delay
-    setTimeout(() => {
-        if (code === ADMIN_MAGIC_CODE) {
-          toast({
-            title: 'Success',
-            description: 'Login successful. Redirecting...',
-          });
-          // In a real app, you'd set a secure, http-only cookie or session.
-          // For this example, we'll use sessionStorage.
-          sessionStorage.setItem('isAdminAuthenticated', 'true');
-          router.push('/admin');
-        } else {
-          toast({
+    if (code !== ADMIN_MAGIC_CODE) {
+        toast({
             variant: 'destructive',
             title: 'Login Failed',
             description: 'The provided magic code is incorrect.',
-          });
-          setIsLoading(false);
-        }
-    }, 1000);
+        });
+        setIsLoading(false);
+        return;
+    }
+    
+    try {
+        // We use a fixed email/password combination for the admin user.
+        // In a real application, this should be handled more securely,
+        // for example, by creating a custom token on a server and using signInWithCustomToken.
+        // For this project, we'll use a pre-existing admin account.
+        await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
+        router.push('/admin');
+
+    } catch (error: any) {
+        // This can happen if the admin user doesn't exist.
+        // We could create it here, but for simplicity, we assume it's pre-created.
+        console.error("Admin sign-in error:", error);
+        toast({
+            variant: 'destructive',
+            title: 'Admin Authentication Failed',
+            description: 'Could not sign in the admin user. Please check console.',
+        });
+        setIsLoading(false);
+    }
   };
 
   return (

@@ -31,11 +31,16 @@ import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { adminNavLinks, authLinks } from "@/lib/constants";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { useUser, useAuth } from "@/firebase";
+import { signOut } from "firebase/auth";
 
 const sidebarProfileNav = [
   { name: "Admin Settings", href: "/admin/settings", icon: Settings },
 ];
+
+// This should be stored in a secure environment variable in a real application
+const ADMIN_UID = 'pYJb2fT8ZaRjS4eXq2tWz3fG8yH3';
 
 export default function AdminLayout({
   children,
@@ -44,29 +49,26 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  
+  const isAdmin = user?.uid === ADMIN_UID;
 
   useEffect(() => {
-    // This effect should only run on the client
-    if (typeof window !== 'undefined') {
-        const adminSession = sessionStorage.getItem('isAdminAuthenticated');
-        if (adminSession === 'true') {
-          setIsAdminAuthenticated(true);
-        } else {
-          setIsAdminAuthenticated(false);
-          // Only redirect if not already on the login page
-          if (pathname !== '/admin/login') {
+    // Wait until auth state is resolved
+    if (!isUserLoading) {
+      // If not authenticated or not the admin, redirect to login
+      if (!user || user.uid !== ADMIN_UID) {
+        if (pathname !== '/admin/login') {
             router.push('/admin/login');
-          }
         }
-        setIsLoading(false);
+      }
     }
-  }, [router, pathname]);
+  }, [isUserLoading, user, router, pathname]);
 
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('isAdminAuthenticated');
+  const handleLogout = async () => {
+    await signOut(auth);
     router.push('/admin/login');
   };
 
@@ -76,7 +78,7 @@ export default function AdminLayout({
   }
 
 
-  if (isLoading || !isAdminAuthenticated) {
+  if (isUserLoading || !isAdmin) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
