@@ -8,8 +8,8 @@ export const publicNavLinks = [
 ];
 
 export const authLinks = {
-  login: '/login',
-  signup: '/signup',
+  login: '/auth/login',
+  signup: '/auth/signup',
   dashboard: '/dashboard',
 };
 

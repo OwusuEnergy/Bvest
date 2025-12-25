@@ -4,6 +4,8 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useState, useMemo } from "react";
+import { Footer } from "@/components/layout/footer";
+import { Header } from "@/components/layout/header";
 
 const allFaqItems = [
   // General
@@ -75,41 +77,47 @@ export default function FaqPage() {
   }, [searchTerm]);
 
   return (
-    <div className="container py-12 sm:py-16">
-      <div className="text-center">
-        <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          Frequently Asked Questions
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground">
-          Find answers to common questions about CarVest.
-        </p>
-      </div>
+    <div className="flex min-h-screen flex-col">
+      <Header />
+      <main className="flex-1">
+        <div className="container py-12 sm:py-16">
+          <div className="text-center">
+            <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+              Frequently Asked Questions
+            </h1>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Find answers to common questions about CarVest.
+            </p>
+          </div>
 
-      <div className="mt-10 max-w-3xl mx-auto">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search questions..."
-            className="w-full pl-10"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
+          <div className="mt-10 max-w-3xl mx-auto">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder="Search questions..."
+                className="w-full pl-10"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            <Accordion type="single" collapsible className="mt-6 w-full">
+              {filteredFaqs.length > 0 ? (
+                filteredFaqs.map((item, index) => (
+                  <AccordionItem value={`item-${index}`} key={index}>
+                    <AccordionTrigger>{item.question}</AccordionTrigger>
+                    <AccordionContent>{item.answer}</AccordionContent>
+                  </AccordionItem>
+                ))
+              ) : (
+                <p className="text-center text-muted-foreground mt-8">No questions found for your search.</p>
+              )}
+            </Accordion>
+          </div>
         </div>
-
-        <Accordion type="single" collapsible className="mt-6 w-full">
-          {filteredFaqs.length > 0 ? (
-            filteredFaqs.map((item, index) => (
-              <AccordionItem value={`item-${index}`} key={index}>
-                <AccordionTrigger>{item.question}</AccordionTrigger>
-                <AccordionContent>{item.answer}</AccordionContent>
-              </AccordionItem>
-            ))
-          ) : (
-            <p className="text-center text-muted-foreground mt-8">No questions found for your search.</p>
-          )}
-        </Accordion>
-      </div>
+      </main>
+      <Footer />
     </div>
   );
 }
