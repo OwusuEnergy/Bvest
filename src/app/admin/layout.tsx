@@ -25,20 +25,15 @@ import {
   Shield,
   User,
 } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { useAuth, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
-import { authLinks, adminNavLinks } from "@/lib/constants";
-import { signOut } from "firebase/auth";
-import { useEffect } from "react";
-import { doc } from "firebase/firestore";
+import { adminNavLinks, authLinks } from "@/lib/constants";
+import { useEffect, useState } from "react";
 
 const sidebarProfileNav = [
-  { name: "Profile", href: "/dashboard/profile", icon: User },
   { name: "Admin Settings", href: "/admin/settings", icon: Settings },
 ];
 
@@ -49,51 +44,33 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isUserLoading } = useUser();
-  const auth = useAuth();
-  const firestore = useFirestore();
-
-  const adminRoleRef = useMemoFirebase(() => {
-    if (!firestore || !user) return null;
-    return doc(firestore, 'roles_admin', user.uid);
-  }, [firestore, user]);
-
-  const { data: adminRole, isLoading: isAdminLoading } = useDoc(adminRoleRef);
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (!isUserLoading && !user) {
-      router.push(authLinks.login);
+    // This check runs only on the client-side
+    const adminSession = sessionStorage.getItem('isAdminAuthenticated');
+    if (adminSession === 'true') {
+      setIsAdminAuthenticated(true);
+    } else {
+      router.push('/admin/login');
     }
-    if (!isAdminLoading && !adminRole) {
-        router.push(authLinks.dashboard);
-    }
-  }, [isUserLoading, user, isAdminLoading, adminRole, router]);
+    setIsLoading(false);
+  }, [router]);
 
-  if (isUserLoading || isAdminLoading || !user || !adminRole) {
+
+  const handleLogout = () => {
+    sessionStorage.removeItem('isAdminAuthenticated');
+    router.push('/admin/login');
+  };
+
+  if (isLoading || !isAdminAuthenticated) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
       </div>
     );
   }
-
-  const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/');
-  };
-
-  const getInitials = (name?: string | null) => {
-    if (!name) return '';
-    const nameParts = name.split(' ');
-    if (nameParts.length > 1 && nameParts[0] && nameParts[nameParts.length - 1]) {
-      return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`;
-    }
-    if (nameParts[0]) {
-       return nameParts[0][0];
-    }
-    return '';
-  }
-
 
   return (
     <SidebarProvider>
@@ -148,15 +125,8 @@ export default function AdminLayout({
               "flex items-center gap-2 rounded-md p-2 text-left text-sm transition-all",
               "group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0"
             )}>
-              <Avatar className="h-8 w-8">
-                  {user.photoURL ? (
-                    <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />
-                  ) : (
-                     <AvatarFallback>{getInitials(user.displayName) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
-                  )}
-              </Avatar>
               <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                  <span className="font-semibold text-foreground">{user.displayName || 'User'}</span>
+                  <span className="font-semibold text-foreground">Admin</span>
                   <span className="text-xs text-muted-foreground flex items-center gap-1">
                     <Shield className="h-3 w-3 text-primary" />
                     Administrator
@@ -185,5 +155,3 @@ export default function AdminLayout({
     </SidebarProvider>
   );
 }
-
-    
