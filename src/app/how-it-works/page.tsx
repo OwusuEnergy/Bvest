@@ -1,8 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { CheckCircle } from "lucide-react";
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
 
 const steps = [
   {
@@ -48,70 +46,64 @@ const faqItems = [
 
 export default function HowItWorksPage() {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1">
-        <div className="container py-12 sm:py-16">
-          <div className="text-center">
-            <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-              How CarVest Works
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-              A simple, transparent process to put your money to work.
-            </p>
-          </div>
+    <div className="container py-12 sm:py-16">
+      <div className="text-center">
+        <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
+          How CarVest Works
+        </h1>
+        <p className="mt-4 text-lg text-muted-foreground">
+          A simple, transparent process to put your money to work.
+        </p>
+      </div>
 
-          <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-            <div className="lg:col-span-2">
-              <h2 className="font-headline text-2xl font-semibold mb-6">Five Simple Steps to Start Earning</h2>
-              <div className="space-y-6">
-                {steps.map((step, index) => (
-                  <div key={index} className="flex items-start gap-4">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
-                      {index + 1}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold">{step.title}</h3>
-                      <p className="text-sm text-muted-foreground">{step.description}</p>
-                    </div>
-                  </div>
-                ))}
+      <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <h2 className="font-headline text-2xl font-semibold mb-6">Five Simple Steps to Start Earning</h2>
+          <div className="space-y-6">
+            {steps.map((step, index) => (
+              <div key={index} className="flex items-start gap-4">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
+                  {index + 1}
+                </div>
+                <div>
+                  <h3 className="font-semibold">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                </div>
               </div>
-            </div>
-            
-            <Card className="bg-primary/5 dark:bg-card">
-                <CardHeader>
-                    <CardTitle className="font-headline">The Process</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ul className="space-y-4">
-                        {steps.map((step, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                            <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
-                            <span className="text-sm text-muted-foreground">{step.title}</span>
-                        </li>
-                        ))}
-                    </ul>
-                </CardContent>
-            </Card>
-          </div>
-
-          <div className="mt-16">
-            <div className="text-center">
-                <h2 className="font-headline text-2xl font-semibold">Frequently Asked Questions</h2>
-            </div>
-            <Accordion type="single" collapsible className="mt-6 max-w-3xl mx-auto">
-                {faqItems.map((item, index) => (
-                <AccordionItem value={`item-${index}`} key={index}>
-                    <AccordionTrigger>{item.question}</AccordionTrigger>
-                    <AccordionContent>{item.answer}</AccordionContent>
-                </AccordionItem>
-                ))}
-            </Accordion>
+            ))}
           </div>
         </div>
-      </main>
-      <Footer />
+        
+        <Card className="bg-primary/5 dark:bg-card">
+            <CardHeader>
+                <CardTitle className="font-headline">The Process</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ul className="space-y-4">
+                    {steps.map((step, index) => (
+                    <li key={index} className="flex items-start gap-3">
+                        <CheckCircle className="h-5 w-5 text-primary mt-0.5 shrink-0" />
+                        <span className="text-sm text-muted-foreground">{step.title}</span>
+                    </li>
+                    ))}
+                </ul>
+            </CardContent>
+        </Card>
+      </div>
+
+      <div className="mt-16">
+        <div className="text-center">
+            <h2 className="font-headline text-2xl font-semibold">Frequently Asked Questions</h2>
+        </div>
+        <Accordion type="single" collapsible className="mt-6 max-w-3xl mx-auto">
+            {faqItems.map((item, index) => (
+            <AccordionItem value={`item-${index}`} key={index}>
+                <AccordionTrigger>{item.question}</AccordionTrigger>
+                <AccordionContent>{item.answer}</AccordionContent>
+            </AccordionItem>
+            ))}
+        </Accordion>
+      </div>
     </div>
   );
 }
