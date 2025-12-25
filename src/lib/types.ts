@@ -6,7 +6,7 @@ export type Car = {
   roi: number;
   totalValue: number;
   investedAmount: number;
-  imageId: string;
+  image: string;
   status: 'available' | 'fully-invested';
 };
 

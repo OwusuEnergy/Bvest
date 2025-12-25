@@ -29,15 +29,14 @@ import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
+import Image from 'next/image';
 
 const addCarFormSchema = z.object({
   name: z.string().min(1, 'Car name is required.'),
   description: z.string().min(1, 'Description is required.'),
   totalValue: z.coerce.number().min(1, 'Total value must be greater than 0.'),
   roi: z.coerce.number().min(0, 'ROI cannot be negative.'),
-  imageId: z.string().min(1, 'Please select an image.'),
+  image: z.string().url('Please enter a valid image URL.'),
 });
 
 type AddCarFormValues = z.infer<typeof addCarFormSchema>;
@@ -55,9 +54,13 @@ export function AddCarDialog() {
       description: '',
       totalValue: 0,
       roi: 0,
-      imageId: '',
+      image: '',
     },
   });
+
+  const imageUrl = form.watch('image');
+  const isUrlValid = z.string().url().safeParse(imageUrl).success;
+
 
   async function onSubmit(values: AddCarFormValues) {
     if (!firestore) return;
@@ -160,28 +163,24 @@ export function AddCarDialog() {
             </div>
              <FormField
                 control={form.control}
-                name="imageId"
+                name="image"
                 render={({ field }) => (
                     <FormItem>
-                    <FormLabel>Car Image</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormLabel>Car Image URL</FormLabel>
                         <FormControl>
-                        <SelectTrigger>
-                            <SelectValue placeholder="Select a car image" />
-                        </SelectTrigger>
+                            <Input placeholder="https://example.com/image.png" {...field} />
                         </FormControl>
-                        <SelectContent>
-                        {PlaceHolderImages.map((image) => (
-                            <SelectItem key={image.id} value={image.id}>
-                                {image.description}
-                            </SelectItem>
-                        ))}
-                        </SelectContent>
-                    </Select>
-                    <FormMessage />
+                        <FormMessage />
                     </FormItem>
                 )}
             />
+
+            {isUrlValid && (
+                <div className="relative h-40 w-full rounded-md border">
+                    <Image src={imageUrl} alt="Car preview" fill className="object-cover rounded-md" />
+                </div>
+            )}
+
             <DialogFooter className="pt-4">
               <DialogClose asChild>
                 <Button variant="outline" type="button">Cancel</Button>

@@ -2,7 +2,6 @@
 'use client';
 
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { InvestmentDialog } from "@/components/investment-dialog";
@@ -54,19 +53,18 @@ export default function InvestmentsPage() {
               </Card>
             ))}
             {cars && cars.map((car, index) => {
-                const carImage = PlaceHolderImages.find(img => img.id === car.imageId);
                 const investmentProgress = car.totalValue > 0 ? (car.investedAmount / car.totalValue) * 100 : 0;
                 return (
                     <Card key={car.id} className="flex flex-col animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
                         <CardHeader className="p-0">
                             <div className="relative h-48 w-full">
-                                {carImage ? (
+                                {car.image ? (
                                     <Image
-                                        src={carImage.imageUrl}
+                                        src={car.image}
                                         alt={car.name}
                                         fill
                                         className="object-cover rounded-t-lg"
-                                        data-ai-hint={carImage.imageHint}
+                                        
                                     />
                                 ): (
                                   <div className="h-full w-full bg-secondary rounded-t-lg" />
