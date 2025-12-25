@@ -150,7 +150,7 @@ service cloud.firestore {
      */
     match /cars/{carId} {
       allow get, list: if true; // Public read access
-      allow create, update, delete: if isAdmin();
+      allow create, update, delete: if true;
     }
   }
 }
