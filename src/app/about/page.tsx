@@ -1,29 +1,7 @@
 import { PlaceHolderImages } from '@/lib/placeholder-images';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Check, Target, Users } from 'lucide-react';
+import { Check, Target } from 'lucide-react';
 import Image from 'next/image';
-
-const teamMembers = [
-  {
-    name: 'Kofi Ampah',
-    role: 'Founder & CEO',
-    avatarId: 'avatar-1',
-    bio: 'Visionary leader with a passion for democratizing investment opportunities in Ghana.'
-  },
-  {
-    name: 'Ama Boateng',
-    role: 'Head of Operations',
-    avatarId: 'avatar-2',
-    bio: 'Expert in fleet management and ensuring our investment vehicles are always profitable.'
-  },
-  {
-    name: 'Yaw Osei',
-    role: 'Lead Developer',
-    avatarId: 'avatar-3',
-    bio: 'The mastermind behind our secure and user-friendly platform.'
-  }
-];
 
 const missionPoints = [
   "To provide accessible and transparent investment opportunities for everyone.",
@@ -87,38 +65,6 @@ export default function AboutPage() {
             </ul>
           </CardContent>
         </Card>
-      </div>
-
-      <div className="mt-20">
-        <div className="text-center">
-          <h2 className="font-headline text-2xl font-semibold text-foreground flex items-center justify-center gap-2">
-            <Users className="h-6 w-6 text-primary"/>
-            Meet the Team
-          </h2>
-          <p className="mt-2 text-muted-foreground">
-            The passionate individuals behind BVest.
-          </p>
-        </div>
-        <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {teamMembers.map((member, index) => {
-            const avatar = PlaceHolderImages.find(img => img.id === member.avatarId);
-            return (
-              <Card key={member.name} className="text-center animate-fade-in-up" style={{animationDelay: `${0.3 + index * 0.1}s`}}>
-                <CardContent className="p-6">
-                  {avatar && 
-                    <Avatar className="h-24 w-24 mx-auto mb-4">
-                      <AvatarImage src={avatar.imageUrl} alt={member.name} data-ai-hint={avatar.imageHint} />
-                      <AvatarFallback>{member.name.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                  }
-                  <h3 className="font-headline text-lg font-semibold">{member.name}</h3>
-                  <p className="text-sm text-primary">{member.role}</p>
-                  <p className="mt-2 text-xs text-muted-foreground">{member.bio}</p>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
       </div>
     </div>
   );
