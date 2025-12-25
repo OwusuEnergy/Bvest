@@ -15,10 +15,12 @@ export function Cedi(props: SVGProps<SVGSVGElement>) {
       strokeLinejoin="round"
       {...props}
     >
-      <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z" />
-      <path d="M15.5 15.5c-1.5 1.5-3.5 2.5-5.5 2.5s-4-1-5.5-2.5" />
-      <path d="M15.5 8.5c-1.5-1.5-3.5-2.5-5.5-2.5s-4 1-5.5 2.5" />
+      <path d="M17 18.5a6 6 0 0 1-5 0" />
+      <path d="M12 12h.01" />
+      <path d="M17 5.5a6 6 0 0 0-5 0" />
       <path d="M12 2v20" />
     </svg>
   );
 }
+
+    

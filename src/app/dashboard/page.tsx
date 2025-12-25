@@ -31,10 +31,10 @@ import { format, differenceInDays, addMonths, parseISO } from 'date-fns';
 import { Progress } from "@/components/ui/progress";
 
 const recentReferrals = [
-    { name: 'Kofi Mensah', level: 1, earnings: 'GHS 50.00', status: 'Active', date: '2 days ago' },
-    { name: 'Ama Serwaa', level: 2, earnings: 'GHS 15.50', status: 'Active', date: '1 day ago' },
-    { name: 'Esi Nana', level: 1, earnings: 'GHS 75.00', status: 'Active', date: '5 hours ago' },
-    { name: 'Kwame Addo', level: 3, earnings: 'GHS 5.00', status: 'Pending', date: '3 days ago' },
+    { name: 'Kofi Mensah', level: 1, earnings: 'GH₵ 50.00', status: 'Active', date: '2 days ago' },
+    { name: 'Ama Serwaa', level: 2, earnings: 'GH₵ 15.50', status: 'Active', date: '1 day ago' },
+    { name: 'Esi Nana', level: 1, earnings: 'GH₵ 75.00', status: 'Active', date: '5 hours ago' },
+    { name: 'Kwame Addo', level: 3, earnings: 'GH₵ 5.00', status: 'Pending', date: '3 days ago' },
 ];
 
 const investments = [
@@ -53,10 +53,10 @@ const profitData = [
 ];
 
 const recentTransactions = [
-    { id: 'TXN-001', type: 'Deposit', amount: 'GHS 500.00', status: 'Completed', date: '3 days ago' },
-    { id: 'TXN-002', type: 'Investment', amount: 'GHS 2000.00', status: 'Completed', date: '2 days ago' },
-    { id: 'TXN-003', type: 'Withdrawal', amount: 'GHS 150.00', status: 'Pending', date: '1 day ago' },
-    { id: 'TXN-004', type: 'Profit', amount: 'GHS 12.50', status: 'Completed', date: '5 hours ago' },
+    { id: 'TXN-001', type: 'Deposit', amount: 'GH₵ 500.00', status: 'Completed', date: '3 days ago' },
+    { id: 'TXN-002', type: 'Investment', amount: 'GH₵ 2000.00', status: 'Completed', date: '2 days ago' },
+    { id: 'TXN-003', type: 'Withdrawal', amount: 'GH₵ 150.00', status: 'Pending', date: '1 day ago' },
+    { id: 'TXN-004', type: 'Profit', amount: 'GH₵ 12.50', status: 'Completed', date: '5 hours ago' },
 ];
 
 
@@ -72,7 +72,7 @@ export default function DashboardPage() {
   const { data: userProfile } = useDoc<{balance: number, totalEarned: number}>(userProfileRef);
 
   const formatCurrency = (amount: number = 0) => {
-    return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
+    return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS', currencyDisplay: 'symbol' }).format(amount);
   }
 
   const statsCards = [
@@ -83,8 +83,8 @@ export default function DashboardPage() {
     },
     {
       title: "Total Investments",
-      amount: "GHS 50,000.00", // This would also come from user data
-      icon: Cedi,
+      amount: "GH₵ 50,000.00", // This would also come from user data
+      icon: Wallet,
     },
     {
       title: "Total Profit",
@@ -93,7 +93,7 @@ export default function DashboardPage() {
     },
     {
       title: "Referral Earnings",
-      amount: "GHS 500.00", // This would also come from user data
+      amount: "GH₵ 500.00", // This would also come from user data
       icon: Users,
     },
   ];
@@ -132,7 +132,7 @@ export default function DashboardPage() {
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="hsl(var(--border))" />
                       <XAxis dataKey="date" stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} />
-                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `GHS ${value}`} />
+                      <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `GH₵ ${value}`} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: 'hsl(var(--card))',
@@ -140,6 +140,7 @@ export default function DashboardPage() {
                           borderRadius: 'var(--radius)',
                         }}
                         labelStyle={{ color: 'hsl(var(--foreground))' }}
+                        formatter={(value: number) => [formatCurrency(value), "Profit"]}
                       />
                       <Area type="monotone" dataKey="profit" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorProfit)" />
                     </AreaChart>
@@ -190,7 +191,7 @@ export default function DashboardPage() {
                 <TableHeader>
                     <TableRow>
                     <TableHead>Car</TableHead>
-                    <TableHead>Amount (GHS)</TableHead>
+                    <TableHead>Amount (GH₵)</TableHead>
                     <TableHead>Monthly ROI</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="w-[300px]">Maturity Progress</TableHead>
@@ -271,3 +272,5 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+    
