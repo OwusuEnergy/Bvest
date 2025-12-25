@@ -7,7 +7,7 @@ import { Footer } from '@/components/layout/footer';
 import { Header } from '@/components/layout/header';
 
 export const metadata: Metadata = {
-  title: 'CarVest - Car Rental Investment Platform',
+  title: 'BVest - Car Rental Investment Platform',
   description: 'Invest in car rentals and earn daily profits. Your journey to passive income starts here.',
 };
 

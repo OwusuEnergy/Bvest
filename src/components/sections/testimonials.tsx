@@ -9,14 +9,14 @@ const testimonials = [
     title: "Small Business Owner",
     avatarId: "avatar-2",
     rating: 5,
-    quote: "CarVest has been a game-changer for my finances. The daily profits are consistent, and the platform is so easy to use. I've already recommended it to all my friends!",
+    quote: "BVest has been a game-changer for my finances. The daily profits are consistent, and the platform is so easy to use. I've already recommended it to all my friends!",
   },
   {
     name: "Kofi Mensah",
     title: "Software Developer",
     avatarId: "avatar-1",
     rating: 5,
-    quote: "As someone in tech, I appreciate the transparency and security of CarVest. The AI calculator is surprisingly accurate, and seeing my investment grow daily is incredibly motivating.",
+    quote: "As someone in tech, I appreciate the transparency and security of BVest. The AI calculator is surprisingly accurate, and seeing my investment grow daily is incredibly motivating.",
   },
   {
     name: "Esi Nana",
@@ -36,7 +36,7 @@ export function Testimonials() {
             Trusted by Investors Like You
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground">
-            See what our community is saying about their journey with CarVest.
+            See what our community is saying about their journey with BVest.
           </p>
         </div>
         <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">

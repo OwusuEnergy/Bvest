@@ -41,7 +41,7 @@ export default function AboutPage() {
           Driving Financial Freedom in Ghana
         </h1>
         <p className="mt-4 max-w-3xl mx-auto text-lg text-muted-foreground">
-          CarVest was born from a simple idea: what if anyone could invest in the lucrative car rental market, without needing to own a car?
+          BVest was born from a simple idea: what if anyone could invest in the lucrative car rental market, without needing to own a car?
         </p>
       </div>
 
@@ -49,7 +49,7 @@ export default function AboutPage() {
         <div>
           <h2 className="font-headline text-2xl font-semibold text-foreground">Our Story</h2>
           <p className="mt-4 text-muted-foreground">
-            Founded in Accra, CarVest started with a small fleet and a big vision. We saw the high demand for rental vehicles from ride-sharing drivers and businesses, but recognized the high barrier to entry for individual investors. We decided to change that.
+            Founded in Accra, BVest started with a small fleet and a big vision. We saw the high demand for rental vehicles from ride-sharing drivers and businesses, but recognized the high barrier to entry for individual investors. We decided to change that.
           </p>
           <p className="mt-4 text-muted-foreground">
             By creating a platform for fractional investment in vehicles, we've opened up a new asset class to everyday Ghanaians. Our model ensures that as our cars earn on the road, our investors earn in their pockets, creating a cycle of shared growth and prosperity.
@@ -59,7 +59,7 @@ export default function AboutPage() {
           {storyImage && (
             <Image
               src={storyImage.imageUrl}
-              alt="CarVest Story"
+              alt="BVest Story"
               fill
               className="rounded-lg object-cover shadow-lg animate-fade-in"
               data-ai-hint={storyImage.imageHint}
@@ -96,7 +96,7 @@ export default function AboutPage() {
             Meet the Team
           </h2>
           <p className="mt-2 text-muted-foreground">
-            The passionate individuals behind CarVest.
+            The passionate individuals behind BVest.
           </p>
         </div>
         <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">

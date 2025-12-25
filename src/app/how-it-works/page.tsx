@@ -49,7 +49,7 @@ export default function HowItWorksPage() {
     <div className="container py-12 sm:py-16 animate-fade-in-up">
       <div className="text-center">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
-          How CarVest Works
+          How BVest Works
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
           A simple, transparent process to put your money to work.

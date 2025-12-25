@@ -29,7 +29,7 @@ export function Hero() {
             <span className="text-primary">Invest in Cars.</span>
           </h1>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Join CarVest and turn cars into a profitable investment. Earn daily returns, track your portfolio, and watch your wealth grow on autopilot.
+            Join BVest and turn cars into a profitable investment. Earn daily returns, track your portfolio, and watch your wealth grow on autopilot.
           </p>
           <div className="mt-10 flex items-center gap-x-6">
             <Button asChild size="lg" className="animate-fade-in" style={{ animationDelay: '0.4s' }}>

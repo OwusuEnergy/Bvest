@@ -9,12 +9,12 @@ const allFaqItems = [
   // General
   {
     category: "General",
-    question: "What is CarVest?",
-    answer: "CarVest is a platform that allows you to invest in a portfolio of car rentals and earn daily profits. We handle the car acquisition, management, and rental process, so you can enjoy passive income.",
+    question: "What is BVest?",
+    answer: "BVest is a platform that allows you to invest in a portfolio of car rentals and earn daily profits. We handle the car acquisition, management, and rental process, so you can enjoy passive income.",
   },
   {
     category: "General",
-    question: "Who can invest on CarVest?",
+    question: "Who can invest on BVest?",
     answer: "Anyone with a valid Ghanaian ID and a bank account or mobile money wallet can invest. You must be 18 years or older.",
   },
   // Investments
@@ -81,7 +81,7 @@ export default function FaqPage() {
           Frequently Asked Questions
         </h1>
         <p className="mt-4 text-lg text-muted-foreground">
-          Find answers to common questions about CarVest.
+          Find answers to common questions about BVest.
         </p>
       </div>
 

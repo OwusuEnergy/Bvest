@@ -15,7 +15,7 @@ export function Cta() {
           </p>
           <div className="mt-8">
             <Button size="lg" variant="secondary" asChild className="animate-fade-in" style={{animationDelay: '0.5s'}}>
-              <Link href={authLinks.signup}>Join CarVest Now</Link>
+              <Link href={authLinks.signup}>Join BVest Now</Link>
             </Button>
           </div>
         </div>

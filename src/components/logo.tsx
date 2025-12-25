@@ -14,7 +14,7 @@ export function Logo({ className, isLink = true }: LogoProps) {
         <Car className="h-6 w-6" />
       </div>
       <span className="text-2xl font-bold font-headline text-foreground">
-        CarVest
+        BVest
       </span>
     </div>
   );
