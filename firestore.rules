@@ -3,22 +3,22 @@
  * # Firestore Security Rules
  *
  * ## Core Philosophy
- * This ruleset enforces a strict user-ownership model combined with a global administrative role for managing public data. The primary goal is to ensure that users can only access and modify their own personal data, while public-facing data remains readable by all authenticated users but writable only by authorized administrators. This approach prioritizes data privacy and integrity.
+ * This ruleset enforces a strict user-ownership model. The primary goal is to ensure that users can only access and modify their own personal data, while public-facing data remains readable by all authenticated users. This approach prioritizes data privacy and integrity.
  *
  * ## Data Structure
  * The data is organized into two main categories:
  * 1. User-Private Data: All data specific to a user (profile, investments, transactions, etc.) is nested hierarchically under the `/users/{userId}` path. This structure naturally aligns with ownership-based security rules.
- * 2. Global Data: Collections like `/cars` contain data that is publicly readable but centrally managed. A dedicated `/roles_admin` collection is used to grant administrative privileges.
+ * 2. Global Data: Collections like `/cars` contain data that is publicly readable but centrally managed.
  *
  * ## Key Security Decisions
  * - Default Deny: All operations are denied by default. Access is granted only through explicit `allow` statements.
  * - Strict Ownership: A user can only access documents within their own data tree (i.e., where the path contains their UID).
  * - No User Enumeration: Listing documents in the top-level `/users` collection is explicitly forbidden to prevent attackers from discovering user IDs. However, listing is allowed for a specific query on `referralCode`.
- * - Admin-Managed Public Data: The `/cars` collection is readable by any signed-in user, but all write operations (create, update, delete) are restricted to users designated as admins in the `/roles_admin` collection.
+ * - Publicly Readable Cars: The `/cars` collection is readable by any signed-in user, but all write operations (create, update, delete) are restricted.
  * - Relational Integrity: On document creation, rules validate that ownership fields within the document (e.g., `userId`, `referrerId`) match the user ID in the document path, ensuring data consistency. These fields are immutable once set.
  *
  * ## Denormalization for Authorization
- * To create simpler and more performant rules, this ruleset relies on denormalization. The `/roles_admin/{userId}` collection is a prime example; a simple existence check (`exists()`) on this path is used to verify a user's administrative status without needing to read other documents. Within user subcollections, an internal `userId` is validated against the path `userId` to ensure the document's data correctly reflects its location and ownership.
+ * To create simpler and more performant rules, this ruleset relies on denormalization. Within user subcollections, an internal `userId` is validated against the path `userId` to ensure the document's data correctly reflects its location and ownership.
  *
  * ## Structural Segregation
  * The ruleset leverages separate collections for data with different access patterns. Private, user-owned data is segregated into `/users/{userId}/...` subcollections, while public-read data is placed in the top-level `/cars` collection. This separation makes list operations secure and efficient, as queries do not need to filter out private data.
@@ -37,19 +37,6 @@ service cloud.firestore {
     function isSignedIn() {
       return request.auth != null;
     }
-    
-    // This should be stored in a secure environment variable in a real application
-    function adminUID() {
-      return 'pYJb2fT8ZaRjS4eXq2tWz3fG8yH3';
-    }
-
-    /**
-     * Checks if the request is from a user with administrative privileges.
-     * Admin status is determined by matching the request UID with a hardcoded admin UID.
-     */
-    function isAdmin() {
-      return isSignedIn() && request.auth.uid == adminUID();
-    }
 
     /**
      * Checks if the authenticated user's UID matches the provided userId.
@@ -67,34 +54,26 @@ service cloud.firestore {
       return isOwner(userId) && resource != null;
     }
 
-    /**
-     * Checks for admin privileges on an existing document.
-     * Ensures that admin update/delete operations target a document that exists.
-     */
-    function isExistingAdmin() {
-      return isAdmin() && resource != null;
-    }
-
     // --------------------------------
     // User Data Collections
     // --------------------------------
 
     /**
      * @description Manages user profile documents. Users can create their own profile,
-     *   and can only read or write to their own document thereafter. Admins have full access.
+     *   and can only read or write to their own document thereafter.
      * @path /users/{userId}
      * @allow (create) An authenticated user creating their own profile document. `request.auth.uid == userId`.
-     * @allow (list) Allows querying for a user by their referral code or allows admins to list all users.
+     * @allow (list) Allows querying for a user by their referral code.
      * @deny (get) A user trying to read another user's profile. `request.auth.uid != userId`.
-     * @deny (list) Any non-admin user trying to list all documents in the `/users` collection without a specific filter.
-     * @principle Enforces strict self-service and ownership for user profiles and prevents user enumeration for non-admins.
+     * @deny (list) Any user trying to list all documents in the `/users` collection without a specific filter.
+     * @principle Enforces strict self-service and ownership for user profiles and prevents user enumeration.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId) || isAdmin();
-      allow list: if isAdmin() || (request.query.keys().hasOnly(['where', 'limit']) && request.query.where[0][0] == 'referralCode');
+      allow get: if isOwner(userId);
+      allow list: if request.query.keys().hasOnly(['where', 'limit']) && request.query.where[0][0] == 'referralCode';
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId) || isAdmin();
-      allow delete: if isOwner(userId) || isAdmin();
+      allow update: if isOwner(userId);
+      allow delete: if isOwner(userId);
     }
 
     /**
@@ -159,29 +138,15 @@ service cloud.firestore {
 
     /**
      * @description Manages car details available for investment. This data is public for any signed-in user to read.
-     *   Only administrators can create, modify, or delete car listings.
+     *   Writes are disallowed from the client.
      * @path /cars/{carId}
      * @allow (get) Any authenticated user reading a car's details.
-     * @deny (create) A non-admin user trying to add a new car.
+     * @deny (create) Any user trying to add a new car.
      * @principle Implements a "Public Read with Admin-Only Writes" pattern for globally shared data.
      */
     match /cars/{carId} {
       allow get, list: if isSignedIn();
-      allow create, update, delete: if isAdmin();
-    }
-
-    /**
-     * @description Manages administrator roles. The existence of a document in this collection grants a user admin privileges.
-     *   Only existing administrators can view or modify the list of admins.
-     * @path /roles_admin/{userId}
-     * @allow (create) An existing admin adding a new admin role for another user.
-     * @deny (create) A non-admin user attempting to grant themselves admin privileges.
-     * @deny (get) A non-admin user trying to check if another user is an admin.
-     * @principle Secures role management by restricting modifications to current role-holders.
-     */
-    match /roles_admin/{userId} {
-      allow get: if isOwner(userId);
-      allow list, create, update, delete: if isAdmin();
+      allow create, update, delete: if false;
     }
   }
 }

@@ -350,24 +350,6 @@
         "balanceAfter",
         "createdAt"
       ]
-    },
-    "adminRole": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Admin Role",
-      "type": "object",
-      "description": "Represents an admin role assignment for a user.",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "description": "The UID of the user being granted admin privileges."
-        },
-        "assignedAt": {
-          "type": "string",
-          "description": "Timestamp when the admin role was assigned.",
-          "format": "date-time"
-        }
-      },
-      "required": ["userId", "assignedAt"]
     }
   },
   "auth": {
@@ -488,26 +470,8 @@
             }
           ]
         }
-      },
-      {
-        "path": "/roles_admin/{userId}",
-        "definition": {
-          "entityName": "adminRole",
-          "schema": {
-            "$ref": "#/backend/entities/adminRole"
-          },
-          "description": "Collection to store admin roles, using existence over content for authorization.",
-          "params": [
-            {
-              "name": "userId",
-              "description": "The unique identifier for the user with admin role."
-            }
-          ]
-        }
       }
     ],
-    "reasoning": "The Firestore data structure is designed to ensure security, scalability, and ease of debugging, adhering to the core design principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters). Authorization Independence is achieved through denormalization. For instance, access to investments, referrals, withdrawals, and transactions related to a user is controlled by the user's ID within those documents, avoiding hierarchical `get()` calls. Structural Segregation is used by separating data based on access needs. Private user data is stored under `/users/{userId}`, while global data like available cars is stored in the `/cars` collection. Access Modeling uses path-based ownership (`/users/{userId}/investments/{investmentId}`) for user-owned data. The design facilitates secure list operations (QAPs) by ensuring that collections only contain documents with the same security requirements, avoiding the need for complex filtering in rules. Global roles are managed using the existence of documents in dedicated collections like `/roles_admin/{uid}`.  This structure ensures robust security rules, simplifies debugging, and supports atomic operations."
+    "reasoning": "The Firestore data structure is designed to ensure security, scalability, and ease of debugging, adhering to the core design principles of Authorization Independence, Clarity of Intent, DBAC (Database-Based Access Control), and QAPs (Rules are not Filters). Authorization Independence is achieved through denormalization. For instance, access to investments, referrals, withdrawals, and transactions related to a user is controlled by the user's ID within those documents, avoiding hierarchical `get()` calls. Structural Segregation is used by separating data based on access needs. Private user data is stored under `/users/{userId}`, while global data like available cars is stored in the `/cars` collection. Access Modeling uses path-based ownership (`/users/{userId}/investments/{investmentId}`) for user-owned data. The design facilitates secure list operations (QAPs) by ensuring that collections only contain documents with the same security requirements, avoiding the need for complex filtering in rules. This structure ensures robust security rules, simplifies debugging, and supports atomic operations."
   }
 }
-
-    

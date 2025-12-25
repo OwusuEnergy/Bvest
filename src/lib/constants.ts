@@ -17,18 +17,10 @@ export const publicNavLinks: NavLink[] = [
   },
 ];
 
-export const adminNavLinks: NavLink[] = [
-  { name: 'Dashboard', path: '/admin' },
-  { name: 'Cars', path: '/admin/cars' },
-  { name: 'Users', path: '/admin/users' },
-  { name: 'Withdrawals', path: '/admin/withdrawals' },
-];
-
 export const authLinks = {
   login: '/auth/login',
   signup: '/auth/login', // Direct to login page which has signup tab
   dashboard: '/dashboard',
-  admin: '/admin',
 };
 
 export const footerLinks = {
@@ -44,5 +36,3 @@ export const footerLinks = {
     { name: 'FAQ', path: '/faq' },
   ],
 };
-
-    
