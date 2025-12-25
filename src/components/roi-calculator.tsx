@@ -75,12 +75,12 @@ export function RoiCalculator() {
           <Sparkles className="h-6 w-6 text-accent" />
           Automated ROI Calculator
         </CardTitle>
-        <FormDescription>
-          Use our AI-powered tool to predict potential returns on your car investment.
-        </FormDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
+          <FormDescription className="mb-6">
+            Use our AI-powered tool to predict potential returns on your car investment.
+          </FormDescription>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
               <FormField
