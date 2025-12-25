@@ -18,7 +18,6 @@ import { ChevronDown, LogOut, Wallet } from 'lucide-react';
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { doc } from 'firebase/firestore';
 
 export function Header() {
@@ -26,7 +25,6 @@ export function Header() {
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
-  const avatar = PlaceHolderImages.find((img) => img.id === 'avatar-1');
 
   const userProfileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -119,9 +117,8 @@ export function Header() {
                           {user.photoURL ? (
                             <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />
                           ) : (
-                            avatar && <AvatarImage src={avatar.imageUrl} alt="User Avatar" />
+                            <AvatarFallback>{getInitials(user.displayName) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
                           )}
-                          <AvatarFallback>{getInitials(user.displayName) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>

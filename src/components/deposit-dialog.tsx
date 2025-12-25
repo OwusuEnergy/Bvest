@@ -25,30 +25,29 @@ import { usePaystackPayment } from 'react-paystack';
 import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { CheckCircle } from 'lucide-react';
+import type { User } from 'firebase/auth';
 
 
 const depositFormSchema = z.object({
-    email: z.string().email({ message: 'Please enter a valid email.' }),
     amount: z.coerce.number().min(10, { message: 'Minimum deposit is GHS 10.' }),
 });
 
 type DepositFormValues = z.infer<typeof depositFormSchema>;
 
-export function DepositDialog({ children }: { children: React.ReactNode }) {
+export function DepositDialog({ children, user }: { children: React.ReactNode, user: User | null }) {
     const [open, setOpen] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
 
     const form = useForm<DepositFormValues>({
         resolver: zodResolver(depositFormSchema),
         defaultValues: {
-            email: 'user@email.com',
             amount: 100,
         },
     });
 
     const config = {
         reference: new Date().getTime().toString(),
-        email: form.watch('email'),
+        email: user?.email || '',
         amount: form.watch('amount') * 100, // Amount in pesewas
         publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '', // Use environment variable
         currency: 'GHS',
@@ -95,19 +94,6 @@ export function DepositDialog({ children }: { children: React.ReactNode }) {
                 ) : (
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
-                            <FormField
-                                control={form.control}
-                                name="email"
-                                render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Email Address</FormLabel>
-                                    <FormControl>
-                                    <Input type="email" placeholder="you@example.com" {...field} />
-                                    </FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                                )}
-                            />
                             <FormField
                                 control={form.control}
                                 name="amount"

@@ -32,7 +32,6 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
-import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DepositDialog } from "@/components/deposit-dialog";
@@ -65,7 +64,6 @@ export default function DashboardLayout({
   const { user, isUserLoading } = useUser();
   const auth = useAuth();
   const firestore = useFirestore();
-  const avatar = PlaceHolderImages.find((img) => img.id === 'avatar-1');
 
   const userProfileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
@@ -163,9 +161,8 @@ export default function DashboardLayout({
                   {user.photoURL ? (
                     <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />
                   ) : (
-                    avatar && <AvatarImage src={avatar.imageUrl} alt="User Avatar" />
+                     <AvatarFallback>{getInitials(user.displayName) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
                   )}
-                  <AvatarFallback>{getInitials(user.displayName) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col group-data-[collapsible=icon]:hidden">
                   <span className="font-semibold text-foreground">{user.displayName || 'User'}</span>
@@ -193,7 +190,7 @@ export default function DashboardLayout({
               <Button asChild variant="outline">
                 <Link href="/dashboard/withdraw">Withdraw</Link>
               </Button>
-              <DepositDialog>
+              <DepositDialog user={user}>
                 <Button>Deposit</Button>
               </DepositDialog>
               <ThemeToggle />
