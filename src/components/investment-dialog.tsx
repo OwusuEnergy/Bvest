@@ -9,7 +9,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
@@ -25,9 +24,9 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const investmentPlans = [
-  { name: 'Silver', amount: 100, description: 'A great starting point' },
-  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth' },
-  { name: 'Gold', amount: 500, description: 'Maximize your potential returns' },
+  { name: 'Silver', amount: 100, description: 'A great starting point', colorClass: 'border-slate-300' },
+  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', colorClass: 'border-orange-400' },
+  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', colorClass: 'border-amber-400' },
 ];
 
 export function InvestmentDialog({ car }: { car: Car }) {
@@ -218,7 +217,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
                 onClick={() => setSelectedPlan(plan)}
                 className={cn(
                     'cursor-pointer transition-all hover:scale-105 border-2',
-                    selectedPlan?.name === plan.name ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'border-transparent'
+                    selectedPlan?.name === plan.name ? `ring-2 ring-primary ring-offset-2 ring-offset-background ${plan.colorClass}` : 'border-transparent'
                 )}
                 >
                 <CardContent className="p-4 flex justify-between items-center">
