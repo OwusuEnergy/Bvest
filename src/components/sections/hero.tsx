@@ -35,9 +35,6 @@ export function Hero() {
             <Button asChild size="lg" className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <Link href={authLinks.signup}>Get Started</Link>
             </Button>
-            <Button asChild variant="ghost" size="lg" className="animate-fade-in" style={{ animationDelay: '0.5s' }}>
-              <Link href="/how-it-works">Learn More &rarr;</Link>
-            </Button>
           </div>
         </div>
       </div>
