@@ -2,6 +2,7 @@ import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { authLinks } from '@/lib/constants';
 
 export function Hero() {
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-background');
@@ -32,7 +33,7 @@ export function Hero() {
           </p>
           <div className="mt-10 flex items-center gap-x-6">
             <Button asChild size="lg">
-              <Link href="/signup">Get Started</Link>
+              <Link href={authLinks.signup}>Get Started</Link>
             </Button>
             <Button asChild variant="ghost" size="lg">
               <Link href="/how-it-works">Learn More &rarr;</Link>

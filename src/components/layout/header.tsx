@@ -34,10 +34,10 @@ export function Header() {
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <Button variant="outline" asChild>
-              <Link href={authLinks.login}>Login</Link>
+              <Link href={authLinks.login}>Sign In</Link>
             </Button>
             <Button asChild>
-              <Link href={authLinks.signup}>Sign Up</Link>
+              <Link href={authLinks.signup}>Create Account</Link>
             </Button>
           </div>
         </div>

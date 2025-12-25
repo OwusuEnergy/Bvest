@@ -9,7 +9,7 @@ export const publicNavLinks = [
 
 export const authLinks = {
   login: '/auth/login',
-  signup: '/auth/signup',
+  signup: '/auth/login',
   dashboard: '/dashboard',
 };
 

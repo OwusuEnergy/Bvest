@@ -44,10 +44,10 @@ export function MobileNav() {
         </div>
         <div className="mt-8 flex flex-col space-y-2">
             <Button variant="outline" asChild>
-              <Link href={authLinks.login}>Login</Link>
+              <Link href={authLinks.login}>Sign In</Link>
             </Button>
             <Button asChild>
-              <Link href={authLinks.signup}>Sign Up</Link>
+              <Link href={authLinks.signup}>Create Account</Link>
             </Button>
         </div>
       </SheetContent>

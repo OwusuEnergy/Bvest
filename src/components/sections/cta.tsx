@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { authLinks } from '@/lib/constants';
 
 export function Cta() {
   return (
@@ -14,7 +15,7 @@ export function Cta() {
           </p>
           <div className="mt-8">
             <Button size="lg" variant="secondary" asChild>
-              <Link href="/signup">Join CarVest Now</Link>
+              <Link href={authLinks.signup}>Join CarVest Now</Link>
             </Button>
           </div>
         </div>
