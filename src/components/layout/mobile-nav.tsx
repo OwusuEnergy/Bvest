@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -15,10 +15,19 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const { user } = useUser();
+  const auth = useAuth();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    setIsOpen(false);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -74,7 +83,7 @@ export function MobileNav() {
                   href={link.path!}
                   onClick={() => setIsOpen(false)}
                   className={cn(
-                    'py-2 text-lg font-medium transition-colors hover:text-primary',
+                    'block py-2 text-lg font-medium transition-colors hover:text-primary',
                     pathname === link.path ? 'text-primary' : 'text-muted-foreground'
                   )}
                 >
@@ -85,12 +94,26 @@ export function MobileNav() {
           </Accordion>
         </div>
         <div className="mt-8 flex flex-col space-y-2">
-            <Button variant="outline" asChild>
-              <Link href={authLinks.login}>Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link href={authLinks.signup}>Create Account</Link>
-            </Button>
+          {user ? (
+            <>
+              <Button asChild>
+                <Link href={authLinks.dashboard} onClick={() => setIsOpen(false)}>Dashboard</Link>
+              </Button>
+              <Button variant="outline" onClick={handleLogout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                Logout
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="outline" asChild>
+                <Link href={authLinks.login} onClick={() => setIsOpen(false)}>Sign In</Link>
+              </Button>
+              <Button asChild>
+                <Link href={authLinks.signup} onClick={() => setIsOpen(false)}>Create Account</Link>
+              </Button>
+            </>
+          )}
         </div>
       </SheetContent>
     </Sheet>

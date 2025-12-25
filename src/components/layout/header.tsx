@@ -14,10 +14,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, LogOut } from 'lucide-react';
+import { useUser, useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
+import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { PlaceHolderImages } from '@/lib/placeholder-images';
 
 export function Header() {
   const pathname = usePathname();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
+  const avatar = PlaceHolderImages.find((img) => img.id === 'avatar-1');
+
+  const handleLogout = async () => {
+    await signOut(auth);
+  };
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -65,12 +76,47 @@ export function Header() {
           </nav>
           <div className="flex items-center gap-2">
             <ThemeToggle />
-            <Button variant="outline" asChild>
-              <Link href={authLinks.login}>Sign In</Link>
-            </Button>
-            <Button asChild>
-              <Link href={authLinks.signup}>Create Account</Link>
-            </Button>
+            {isUserLoading ? (
+              <div className='w-[180px] h-10 bg-muted rounded-md animate-pulse' />
+            ) : user ? (
+              <>
+                <Button variant="outline" asChild>
+                  <Link href={authLinks.dashboard}>Dashboard</Link>
+                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                       <Avatar className="h-8 w-8">
+                          {user.photoURL ? (
+                            <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />
+                          ) : (
+                            avatar && <AvatarImage src={avatar.imageUrl} alt="User Avatar" />
+                          )}
+                          <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={handleLogout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" asChild>
+                  <Link href={authLinks.login}>Sign In</Link>
+                </Button>
+                <Button asChild>
+                  <Link href={authLinks.signup}>Create Account</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
         <div className="flex flex-1 items-center justify-end md:hidden">

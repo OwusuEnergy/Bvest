@@ -19,7 +19,7 @@ export const publicNavLinks: NavLink[] = [
 
 export const authLinks = {
   login: '/auth/login',
-  signup: '/auth/login',
+  signup: '/auth/login', // Direct to login page which has signup tab
   dashboard: '/dashboard',
 };
 

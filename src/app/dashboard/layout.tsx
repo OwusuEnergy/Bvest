@@ -24,17 +24,22 @@ import {
   LogOut,
   Menu,
   Wallet,
+  Loader2,
 } from "lucide-react";
 import { Cedi } from "@/components/cedi-icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { DepositDialog } from "@/components/deposit-dialog";
+import { useAuth, useUser } from "@/firebase";
+import { authLinks } from "@/lib/constants";
+import { signOut } from "firebase/auth";
+import { useEffect } from "react";
 
 const sidebarNav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -56,7 +61,29 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, isUserLoading } = useUser();
+  const auth = useAuth();
   const avatar = PlaceHolderImages.find((img) => img.id === 'avatar-1');
+
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push(authLinks.login);
+    }
+  }, [isUserLoading, user, router]);
+
+  if (isUserLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
 
   return (
     <SidebarProvider>
@@ -97,12 +124,10 @@ export default function DashboardLayout({
               </SidebarMenuItem>
             ))}
              <SidebarMenuItem>
-                <Link href="/">
-                  <SidebarMenuButton tooltip="Logout">
-                    <LogOut />
-                    <span>Logout</span>
-                  </SidebarMenuButton>
-                </Link>
+                <SidebarMenuButton tooltip="Logout" onClick={handleLogout}>
+                  <LogOut />
+                  <span>Logout</span>
+                </SidebarMenuButton>
               </SidebarMenuItem>
           </SidebarMenu>
 
@@ -111,12 +136,16 @@ export default function DashboardLayout({
               "group-data-[collapsible=icon]:size-8 group-data-[collapsible=icon]:p-0"
             )}>
               <Avatar className="h-8 w-8">
-                  {avatar && <AvatarImage src={avatar.imageUrl} alt="User Avatar" />}
-                  <AvatarFallback>U</AvatarFallback>
+                  {user.photoURL ? (
+                    <AvatarImage src={user.photoURL} alt={user.displayName || 'User Avatar'} />
+                  ) : (
+                    avatar && <AvatarImage src={avatar.imageUrl} alt="User Avatar" />
+                  )}
+                  <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-                  <span className="font-semibold text-foreground">User</span>
-                  <span className="text-xs text-muted-foreground">user@email.com</span>
+                  <span className="font-semibold text-foreground">{user.displayName || 'User'}</span>
+                  <span className="text-xs text-muted-foreground">{user.email}</span>
               </div>
           </div>
 
