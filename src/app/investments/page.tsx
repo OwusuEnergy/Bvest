@@ -1,15 +1,19 @@
-import { Button } from "@/components/ui/button";
+
+'use client';
+
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import Link from "next/link";
+import { InvestmentDialog } from "@/components/investment-dialog";
+import type { Car } from "@/lib/types";
 
-const cars = [
-    { id: 'suv-01', name: 'Standard SUV', roi: 12, imageId: 'car-suv', slots: 5, totalValue: 150000, investedAmount: 75000 },
-    { id: 'sedan-01', name: 'Economy Sedan', roi: 9.5, imageId: 'car-sedan', slots: 2, totalValue: 80000, investedAmount: 60000 },
-    { id: 'luxury-01', name: 'Luxury Sportscar', roi: 15, imageId: 'car-luxury', slots: 10, totalValue: 400000, investedAmount: 120000 },
-    { id: 'sedan-02', name: 'Comfort Sedan', roi: 10, imageId: 'car-sedan', slots: 0, totalValue: 95000, investedAmount: 95000 },
+
+const cars: Car[] = [
+    { id: 'suv-01', name: 'Standard SUV', roi: 12, imageId: 'car-suv', slots: 5, totalValue: 150000, investedAmount: 75000, description: 'A reliable and spacious SUV perfect for families and long trips.' },
+    { id: 'sedan-01', name: 'Economy Sedan', roi: 9.5, imageId: 'car-sedan', slots: 2, totalValue: 80000, investedAmount: 60000, description: 'An efficient and comfortable sedan ideal for city driving.' },
+    { id: 'luxury-01', name: 'Luxury Sportscar', roi: 15, imageId: 'car-luxury', slots: 10, totalValue: 400000, investedAmount: 120000, description: 'Experience performance and style with this premium sportscar.' },
+    { id: 'sedan-02', name: 'Comfort Sedan', roi: 10, imageId: 'car-sedan', slots: 0, totalValue: 95000, investedAmount: 95000, description: 'A comfortable and stylish sedan for a smooth ride.' },
 ];
 
 export default function InvestmentsPage() {
@@ -30,11 +34,11 @@ export default function InvestmentsPage() {
                 const carImage = PlaceHolderImages.find(img => img.id === car.imageId);
                 const investmentProgress = (car.investedAmount / car.totalValue) * 100;
                 return (
-                    <Card key={car.id} className="animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
+                    <Card key={car.id} className="flex flex-col animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
                         <CardHeader className="p-0">
                             <div className="relative h-48 w-full">
                                 {carImage && (
-                                    <Image 
+                                    <Image
                                         src={carImage.imageUrl}
                                         alt={car.name}
                                         fill
@@ -45,8 +49,9 @@ export default function InvestmentsPage() {
                                 <Badge variant="secondary" className="absolute top-2 right-2">{car.roi}% ROI</Badge>
                             </div>
                         </CardHeader>
-                        <CardContent className="p-4">
+                        <CardContent className="p-4 flex-grow">
                             <CardTitle className="font-headline text-lg mb-2">{car.name}</CardTitle>
+                            <p className="text-sm text-muted-foreground mb-4">{car.description}</p>
                             <div className="text-sm text-muted-foreground">
                                 <p>Invested: {investmentProgress.toFixed(0)}%</p>
                                 <div className="w-full bg-muted rounded-full h-2 my-2">
@@ -56,9 +61,7 @@ export default function InvestmentsPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="p-4">
-                            <Button asChild className="w-full" disabled={car.slots === 0}>
-                                <Link href={`/dashboard/invest?car=${car.id}`}>{car.slots > 0 ? 'Invest Now' : 'Fully Funded'}</Link>
-                            </Button>
+                           <InvestmentDialog car={car} />
                         </CardFooter>
                     </Card>
                 )
