@@ -13,13 +13,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -31,8 +24,7 @@ import { collection, serverTimestamp } from 'firebase/firestore';
 
 const withdrawalFormSchema = z.object({
   amount: z.coerce.number().min(100, { message: 'Minimum withdrawal is GHS 100.' }),
-  method: z.string().min(1, { message: 'Please select an account type.' }),
-  details: z.string().min(1, { message: 'Please provide account details.' }),
+  details: z.string().min(10, { message: 'Please provide a valid mobile money number.' }),
 });
 
 type WithdrawalFormValues = z.infer<typeof withdrawalFormSchema>;
@@ -47,7 +39,6 @@ export default function WithdrawPage() {
     resolver: zodResolver(withdrawalFormSchema),
     defaultValues: {
       amount: 100,
-      method: '',
       details: '',
     },
   });
@@ -67,7 +58,7 @@ export default function WithdrawPage() {
       await addDocumentNonBlocking(withdrawalsCol, {
         userId: user.uid,
         amount: values.amount,
-        method: values.method,
+        method: 'momo',
         details: values.details,
         status: 'pending',
         createdAt: serverTimestamp(),
@@ -97,7 +88,7 @@ export default function WithdrawPage() {
         <Card>
           <CardHeader>
             <CardTitle>Withdrawal Request</CardTitle>
-            <CardDescription>Funds will be sent to your selected account.</CardDescription>
+            <CardDescription>Funds will be sent to your Mobile Money account.</CardDescription>
           </CardHeader>
           <CardContent>
             {withdrawalSuccess ? (
@@ -124,35 +115,14 @@ export default function WithdrawPage() {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="method"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Payout Account Type</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select account type" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="momo">Mobile Money</SelectItem>
-                            <SelectItem value="bank">Bank Account</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                    <FormField
                     control={form.control}
                     name="details"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Account Details</FormLabel>
+                        <FormLabel>Mobile Money Number</FormLabel>
                         <FormControl>
-                          <Input placeholder="Enter your number or bank account details" {...field} />
+                          <Input placeholder="Enter your mobile money number" {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
