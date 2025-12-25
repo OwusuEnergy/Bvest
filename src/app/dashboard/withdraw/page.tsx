@@ -21,37 +21,66 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { usePaystackPayment } from 'react-paystack';
 import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, Loader2 } from 'lucide-react';
+import { useFirestore, useUser } from '@/firebase';
+import { addDocumentNonBlocking } from '@/firebase/non-blocking-updates';
+import { collection, serverTimestamp } from 'firebase/firestore';
 
 
 const withdrawalFormSchema = z.object({
   amount: z.coerce.number().min(100, { message: 'Minimum withdrawal is GHS 100.' }),
-  accountType: z.string().min(1, { message: 'Please select an account type.' }),
-  accountDetails: z.string().min(1, { message: 'Please provide account details.' }),
+  method: z.string().min(1, { message: 'Please select an account type.' }),
+  details: z.string().min(1, { message: 'Please provide account details.' }),
 });
 
 type WithdrawalFormValues = z.infer<typeof withdrawalFormSchema>;
 
 export default function WithdrawPage() {
   const [withdrawalSuccess, setWithdrawalSuccess] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const { user } = useUser();
+  const firestore = useFirestore();
 
   const form = useForm<WithdrawalFormValues>({
     resolver: zodResolver(withdrawalFormSchema),
     defaultValues: {
       amount: 100,
-      accountType: '',
-      accountDetails: '',
+      method: '',
+      details: '',
     },
   });
 
-  function onSubmit(values: WithdrawalFormValues) {
-    console.log('Withdrawal request:', values);
-    // Here you would typically call your backend to process the withdrawal with Paystack
-    setWithdrawalSuccess(true);
-    form.reset();
+  async function onSubmit(values: WithdrawalFormValues) {
+    if (!user) {
+      // This should ideally be handled more gracefully, e.g., showing a toast
+      console.error("No user logged in");
+      return;
+    }
+    setIsLoading(true);
+    setWithdrawalSuccess(false);
+
+    try {
+      const withdrawalsCol = collection(firestore, `users/${user.uid}/withdrawals`);
+      
+      await addDocumentNonBlocking(withdrawalsCol, {
+        userId: user.uid,
+        amount: values.amount,
+        method: values.method,
+        details: values.details,
+        status: 'pending',
+        createdAt: serverTimestamp(),
+      });
+
+      setWithdrawalSuccess(true);
+      form.reset();
+    } catch (error) {
+      console.error("Error submitting withdrawal request:", error);
+      // Here you could show an error toast to the user
+    } finally {
+      setIsLoading(false);
+    }
   }
 
 
@@ -68,7 +97,7 @@ export default function WithdrawPage() {
         <Card>
           <CardHeader>
             <CardTitle>Withdrawal Request</CardTitle>
-            <CardDescription>Funds will be sent to your selected account via Paystack.</CardDescription>
+            <CardDescription>Funds will be sent to your selected account.</CardDescription>
           </CardHeader>
           <CardContent>
             {withdrawalSuccess ? (
@@ -97,7 +126,7 @@ export default function WithdrawPage() {
                   />
                   <FormField
                     control={form.control}
-                    name="accountType"
+                    name="method"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Payout Account Type</FormLabel>
@@ -118,7 +147,7 @@ export default function WithdrawPage() {
                   />
                    <FormField
                     control={form.control}
-                    name="accountDetails"
+                    name="details"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Account Details</FormLabel>
@@ -129,7 +158,8 @@ export default function WithdrawPage() {
                       </FormItem>
                     )}
                   />
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Request Withdrawal
                   </Button>
                 </form>
