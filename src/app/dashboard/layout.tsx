@@ -166,6 +166,9 @@ export default function DashboardLayout({
                 <Wallet className="h-5 w-5 text-muted-foreground" />
                 <span className="font-semibold">GHS 12,345.67</span>
               </div>
+              <Button asChild variant="outline">
+                <Link href="/dashboard/withdraw">Withdraw</Link>
+              </Button>
               <DepositDialog>
                 <Button>Deposit</Button>
               </DepositDialog>
