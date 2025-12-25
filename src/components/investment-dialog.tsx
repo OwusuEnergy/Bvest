@@ -13,7 +13,7 @@ import {
   DialogFooter,
   DialogClose,
 } from '@/components/ui/dialog';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { useAuth, useFirestore, useUser } from '@/firebase';
 import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
@@ -25,9 +25,9 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const investmentPlans = [
-  { name: 'Silver', amount: 100, description: 'A great starting point' },
-  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth' },
-  { name: 'Gold', amount: 500, description: 'Maximize your potential returns' },
+  { name: 'Silver', amount: 100, description: 'A great starting point', colorClass: 'border-slate-300 dark:border-slate-600' },
+  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', colorClass: 'border-amber-600 dark:border-amber-500' },
+  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', colorClass: 'border-yellow-500 dark:border-yellow-400' },
 ];
 
 export function InvestmentDialog({ car }: { car: Car }) {
@@ -127,8 +127,9 @@ export function InvestmentDialog({ car }: { car: Car }) {
                 key={plan.name}
                 onClick={() => setSelectedPlan(plan)}
                 className={cn(
-                    'cursor-pointer transition-all hover:bg-muted/50',
-                    selectedPlan?.name === plan.name && 'ring-2 ring-primary'
+                    'cursor-pointer transition-all hover:bg-muted/50 border-2',
+                    plan.colorClass,
+                    selectedPlan?.name === plan.name ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'border-transparent'
                 )}
                 >
                 <CardContent className="p-4 flex justify-between items-center">
