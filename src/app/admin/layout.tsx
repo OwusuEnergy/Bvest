@@ -11,10 +11,12 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
   SidebarInset,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Logo } from "@/components/logo";
 import { adminNavLinks } from "@/lib/constants";
 import Link from 'next/link';
+import { Menu } from 'lucide-react';
 
 export default function AdminLayout({
   children,
@@ -25,7 +27,7 @@ export default function AdminLayout({
 
   return (
       <SidebarProvider>
-        <Sidebar>
+        <Sidebar collapsible="icon">
             <SidebarHeader>
                 <Logo />
             </SidebarHeader>
@@ -45,7 +47,17 @@ export default function AdminLayout({
             </SidebarContent>
         </Sidebar>
         <SidebarInset>
-             <main className="flex-1 p-4 md:p-6">{children}</main>
+            <header className="sticky top-0 z-40 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+                 <div className="flex items-center">
+                    <SidebarTrigger>
+                        <Menu className="h-6 w-6"/>
+                    </SidebarTrigger>
+                </div>
+                <div className="flex-1">
+                {/* Add breadcrumbs or page title here */}
+                </div>
+            </header>
+            <main className="flex-1 p-4 md:p-6">{children}</main>
         </SidebarInset>
       </SidebarProvider>
   );
