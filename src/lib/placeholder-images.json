@@ -1,3 +1,46 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "hero-background",
+      "description": "Modern car interior dashboard view",
+      "imageUrl": "https://images.unsplash.com/photo-1616932284498-52d1b727ae74?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHxtb2Rlcm4lMjBjYXJ8ZW58MHx8fHwxNzY2NTk2MTMxfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "modern car"
+    },
+    {
+      "id": "car-suv",
+      "description": "White SUV on a road",
+      "imageUrl": "https://images.unsplash.com/photo-1758217209786-95458c5d30a7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxMHx8d2hpdGUlMjBzdXZ8ZW58MHx8fHwxNzY2NjY1NjMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "white suv"
+    },
+    {
+      "id": "car-sedan",
+      "description": "Black sedan parked",
+      "imageUrl": "https://images.unsplash.com/photo-1763789381416-7b94c5f97560?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw1fHxibGFjayUyMHNlZGFufGVufDB8fHx8MTc2NjY2NTYzM3ww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "black sedan"
+    },
+    {
+      "id": "car-luxury",
+      "description": "Red sports car",
+      "imageUrl": "https://images.unsplash.com/photo-1696581081896-c84e68a27e7e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw2fHxyZWQlMjBzcG9ydHNjYXJ8ZW58MHx8fHwxNzY2NjY1NjMzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "red sportscar"
+    },
+    {
+      "id": "avatar-1",
+      "description": "User avatar 1",
+      "imageUrl": "https://images.unsplash.com/photo-1599566147214-ce487862ea4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBmYWNlfGVufDB8fHx8MTc2NjYwMTI1Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person face"
+    },
+    {
+      "id": "avatar-2",
+      "description": "User avatar 2",
+      "imageUrl": "https://images.unsplash.com/photo-1633934214315-d1a99cc349d7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw3fHx3b21hbiUyMGZhY2V8ZW58MHx8fHwxNzY2NTY2NTA0fDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "woman face"
+    },
+    {
+      "id": "avatar-3",
+      "description": "User avatar 3",
+      "imageUrl": "https://images.unsplash.com/photo-1599566147214-ce487862ea4f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwyfHxwZXJzb24lMjBmYWNlfGVufDB8fHx8MTc2NjYwMTI1Mnww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "person face"
+    }
+  ]
 }
