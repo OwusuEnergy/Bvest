@@ -30,6 +30,15 @@ export function Header() {
     await signOut(auth);
   };
 
+  const getInitials = (name?: string | null) => {
+    if (!name) return '';
+    const nameParts = name.split(' ');
+    if (nameParts.length > 1) {
+      return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`;
+    }
+    return name[0];
+  }
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 max-w-screen-2xl items-center">
@@ -92,7 +101,7 @@ export function Header() {
                           ) : (
                             avatar && <AvatarImage src={avatar.imageUrl} alt="User Avatar" />
                           )}
-                          <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                          <AvatarFallback>{getInitials(user.displayName) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>

@@ -85,6 +85,15 @@ export default function DashboardLayout({
     router.push('/');
   };
 
+  const getInitials = (name?: string | null) => {
+    if (!name) return '';
+    const nameParts = name.split(' ');
+    if (nameParts.length > 1) {
+      return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`;
+    }
+    return name[0];
+  }
+
   return (
     <SidebarProvider>
       <Sidebar>
@@ -141,7 +150,7 @@ export default function DashboardLayout({
                   ) : (
                     avatar && <AvatarImage src={avatar.imageUrl} alt="User Avatar" />
                   )}
-                  <AvatarFallback>{user.displayName?.charAt(0) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
+                  <AvatarFallback>{getInitials(user.displayName) || user.email?.charAt(0)?.toUpperCase()}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col group-data-[collapsible=icon]:hidden">
                   <span className="font-semibold text-foreground">{user.displayName || 'User'}</span>
