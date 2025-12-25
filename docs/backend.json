@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -176,10 +177,6 @@
           "type": "number",
           "description": "Total amount invested in the car."
         },
-        "availableSlots": {
-          "type": "number",
-          "description": "Number of available investment slots for the car."
-        },
         "roi": {
           "type": "number",
           "description": "Return on investment percentage for the car."
@@ -201,7 +198,6 @@
         "image",
         "totalValue",
         "investedAmount",
-        "availableSlots",
         "roi",
         "status"
       ]

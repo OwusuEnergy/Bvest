@@ -25,9 +25,9 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const investmentPlans = [
-  { name: 'Silver', amount: 100, description: 'A great starting point', colorClass: 'border-slate-300 dark:border-slate-600 from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 bg-gradient-to-br' },
-  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', colorClass: 'border-amber-600 dark:border-amber-500 from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-900/70 bg-gradient-to-br' },
-  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', colorClass: 'border-yellow-500 dark:border-yellow-400 from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-900/70 bg-gradient-to-br' },
+  { name: 'Silver', amount: 100, description: 'A great starting point' },
+  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth' },
+  { name: 'Gold', amount: 500, description: 'Maximize your potential returns' },
 ];
 
 export function InvestmentDialog({ car }: { car: Car }) {
@@ -177,7 +177,9 @@ export function InvestmentDialog({ car }: { car: Car }) {
     }
   };
 
-  const isButtonDisabled = car.slots === 0;
+  const investmentProgress = (car.investedAmount / car.totalValue) * 100;
+  const isButtonDisabled = investmentProgress >= 100;
+
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => {
@@ -216,7 +218,6 @@ export function InvestmentDialog({ car }: { car: Car }) {
                 onClick={() => setSelectedPlan(plan)}
                 className={cn(
                     'cursor-pointer transition-all hover:scale-105 border-2',
-                    plan.colorClass,
                     selectedPlan?.name === plan.name ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'border-transparent'
                 )}
                 >

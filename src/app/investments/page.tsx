@@ -10,10 +10,10 @@ import type { Car } from "@/lib/types";
 
 
 const cars: Car[] = [
-    { id: 'suv-01', name: 'Standard SUV', roi: 12, imageId: 'car-suv', slots: 5, totalValue: 150000, investedAmount: 75000, description: 'A reliable and spacious SUV perfect for families and long trips.' },
-    { id: 'sedan-01', name: 'Economy Sedan', roi: 9.5, imageId: 'car-sedan', slots: 2, totalValue: 80000, investedAmount: 60000, description: 'An efficient and comfortable sedan ideal for city driving.' },
-    { id: 'luxury-01', name: 'Luxury Sportscar', roi: 15, imageId: 'car-luxury', slots: 10, totalValue: 400000, investedAmount: 120000, description: 'Experience performance and style with this premium sportscar.' },
-    { id: 'sedan-02', name: 'Comfort Sedan', roi: 10, imageId: 'car-sedan', slots: 0, totalValue: 95000, investedAmount: 95000, description: 'A comfortable and stylish sedan for a smooth ride.' },
+    { id: 'suv-01', name: 'Standard SUV', roi: 12, imageId: 'car-suv', totalValue: 150000, investedAmount: 75000, description: 'A reliable and spacious SUV perfect for families and long trips.' },
+    { id: 'sedan-01', name: 'Economy Sedan', roi: 9.5, imageId: 'car-sedan', totalValue: 80000, investedAmount: 60000, description: 'An efficient and comfortable sedan ideal for city driving.' },
+    { id: 'luxury-01', name: 'Luxury Sportscar', roi: 15, imageId: 'car-luxury', totalValue: 400000, investedAmount: 120000, description: 'Experience performance and style with this premium sportscar.' },
+    { id: 'sedan-02', name: 'Comfort Sedan', roi: 10, imageId: 'car-sedan', totalValue: 95000, investedAmount: 95000, description: 'A comfortable and stylish sedan for a smooth ride.' },
 ];
 
 export default function InvestmentsPage() {
@@ -57,7 +57,6 @@ export default function InvestmentsPage() {
                                 <div className="w-full bg-muted rounded-full h-2 my-2">
                                     <div className="bg-primary h-2 rounded-full" style={{width: `${investmentProgress}%`}}></div>
                                 </div>
-                                <p>{car.slots} slots available</p>
                             </div>
                         </CardContent>
                         <CardFooter className="p-4">
