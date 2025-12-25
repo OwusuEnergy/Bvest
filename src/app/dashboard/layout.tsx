@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { DepositDialog } from "@/components/deposit-dialog";
 
 const sidebarNav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -136,7 +137,9 @@ export default function DashboardLayout({
                 <Wallet className="h-5 w-5 text-muted-foreground" />
                 <span className="font-semibold">GHS 12,345.67</span>
               </div>
-              <Button>Deposit</Button>
+              <DepositDialog>
+                <Button>Deposit</Button>
+              </DepositDialog>
               <ThemeToggle />
             </div>
         </header>

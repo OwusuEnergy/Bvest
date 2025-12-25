@@ -53,7 +53,7 @@ const allFaqItems = [
   {
     category: "Withdrawals",
     question: "How can I withdraw my earnings?",
-    answer: "You can request a withdrawal from your dashboard. We process withdrawals to Ghanaian bank accounts and all major Mobile Money networks (MTN, Vodafone, AirtelTigo).",
+    answer: "You can request a withdrawal from your dashboard. We process withdrawals to Ghanaian bank accounts and all major Mobile Money networks (MTN, Vodafone, AirtelTigo) securely via Paystack.",
   },
   {
     category: "Withdrawals",
