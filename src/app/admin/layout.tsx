@@ -48,21 +48,33 @@ export default function AdminLayout({
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // This check runs only on the client-side
-    const adminSession = sessionStorage.getItem('isAdminAuthenticated');
-    if (adminSession === 'true') {
-      setIsAdminAuthenticated(true);
-    } else {
-      router.push('/admin/login');
+    // This effect should only run on the client
+    if (typeof window !== 'undefined') {
+        const adminSession = sessionStorage.getItem('isAdminAuthenticated');
+        if (adminSession === 'true') {
+          setIsAdminAuthenticated(true);
+        } else {
+          setIsAdminAuthenticated(false);
+          // Only redirect if not already on the login page
+          if (pathname !== '/admin/login') {
+            router.push('/admin/login');
+          }
+        }
+        setIsLoading(false);
     }
-    setIsLoading(false);
-  }, [router]);
+  }, [router, pathname]);
 
 
   const handleLogout = () => {
     sessionStorage.removeItem('isAdminAuthenticated');
     router.push('/admin/login');
   };
+
+  // If we are on the login page, render children directly without the layout shell.
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
 
   if (isLoading || !isAdminAuthenticated) {
     return (

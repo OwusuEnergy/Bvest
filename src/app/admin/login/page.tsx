@@ -23,32 +23,35 @@ export default function AdminLoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    if (code === ADMIN_MAGIC_CODE) {
-      toast({
-        title: 'Success',
-        description: 'Login successful. Redirecting...',
-      });
-      // In a real app, you'd set a secure, http-only cookie or session.
-      // For this example, we'll use sessionStorage.
-      sessionStorage.setItem('isAdminAuthenticated', 'true');
-      router.push('/admin');
-    } else {
-      toast({
-        variant: 'destructive',
-        title: 'Login Failed',
-        description: 'The provided magic code is incorrect.',
-      });
-      setIsLoading(false);
-    }
+    // Simulate network delay
+    setTimeout(() => {
+        if (code === ADMIN_MAGIC_CODE) {
+          toast({
+            title: 'Success',
+            description: 'Login successful. Redirecting...',
+          });
+          // In a real app, you'd set a secure, http-only cookie or session.
+          // For this example, we'll use sessionStorage.
+          sessionStorage.setItem('isAdminAuthenticated', 'true');
+          router.push('/admin');
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'The provided magic code is incorrect.',
+          });
+          setIsLoading(false);
+        }
+    }, 1000);
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-muted/40 p-4">
       <div className="absolute top-8">
         <Logo />
       </div>
       <Card className="w-full max-w-sm animate-fade-in-up">
-        <CardHeader>
+        <CardHeader className="text-center">
           <CardTitle className="font-headline text-2xl">Admin Sign In</CardTitle>
           <CardDescription>
             Enter the security magic code to access the admin panel.
@@ -57,14 +60,14 @@ export default function AdminLoginPage() {
         <CardContent>
           <form onSubmit={handleLogin} className="grid gap-4">
             <div className="grid gap-2">
-              <Label htmlFor="magic-code">Security Code</Label>
+              <Label htmlFor="magic-code" className="sr-only">Security Code</Label>
               <Input
                 id="magic-code"
                 type="password"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 required
-                placeholder="********"
+                placeholder="Enter magic code"
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
