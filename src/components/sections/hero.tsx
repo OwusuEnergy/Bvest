@@ -1,11 +1,16 @@
+
+'use client';
+
 import { PlaceHolderImages } from '@/lib/placeholder-images';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { authLinks } from '@/lib/constants';
+import { useUser } from '@/firebase';
 
 export function Hero() {
   const heroImage = PlaceHolderImages.find((img) => img.id === 'hero-background');
+  const { user, isUserLoading } = useUser();
 
   return (
     <section className="relative h-[80vh] min-h-[600px] w-full">
@@ -32,9 +37,15 @@ export function Hero() {
             Join BVest and turn cars into a profitable investment. Earn daily returns, track your portfolio, and watch your wealth grow on autopilot.
           </p>
           <div className="mt-10 flex items-center gap-x-6">
-            <Button asChild size="lg" className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
-              <Link href={authLinks.signup}>Get Started</Link>
-            </Button>
+            {!isUserLoading && (
+              <Button asChild size="lg" className="animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                {user ? (
+                   <Link href="/investments">Invest Now</Link>
+                ) : (
+                  <Link href={authLinks.signup}>Get Started</Link>
+                )}
+              </Button>
+            )}
           </div>
         </div>
       </div>
