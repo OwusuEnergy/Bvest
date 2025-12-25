@@ -1,10 +1,21 @@
-export const publicNavLinks = [
+type NavLink = {
+  name: string;
+  path?: string;
+  children?: { name: string; path: string }[];
+};
+
+export const publicNavLinks: NavLink[] = [
   { name: 'Home', path: '/' },
   { name: 'How It Works', path: '/how-it-works' },
   { name: 'Investments', path: '/investments' },
-  { name: 'About', path: '/about' },
-  { name: 'FAQ', path: '/faq' },
-  { name: 'Contact', path: '/contact' },
+  {
+    name: 'About',
+    children: [
+      { name: 'About Us', path: '/about' },
+      { name: 'FAQ', path: '/faq' },
+      { name: 'Contact', path: '/contact' },
+    ],
+  },
 ];
 
 export const authLinks = {
@@ -23,5 +34,6 @@ export const footerLinks = {
   company: [
     { name: 'About Us', path: '/about' },
     { name: 'Contact Us', path: '/contact' },
+    { name: 'FAQ', path: '/faq' },
   ],
 };

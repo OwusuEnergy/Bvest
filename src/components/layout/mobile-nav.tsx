@@ -9,6 +9,12 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Logo } from '../logo';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false);
@@ -28,19 +34,55 @@ export function MobileNav() {
       <SheetContent side="left" className="w-[300px]">
         <Logo />
         <div className="mt-8 flex flex-col space-y-4">
-          {publicNavLinks.map((link) => (
-            <Link
-              key={link.path}
-              href={link.path}
-              onClick={() => setIsOpen(false)}
-              className={cn(
-                'text-lg font-medium transition-colors hover:text-primary',
-                pathname === link.path ? 'text-primary' : 'text-muted-foreground'
-              )}
-            >
-              {link.name}
-            </Link>
-          ))}
+          <Accordion type="single" collapsible className="w-full">
+            {publicNavLinks.map((link) =>
+              link.children ? (
+                <AccordionItem value={link.name} key={link.name} className="border-b-0">
+                  <AccordionTrigger
+                    className={cn(
+                      "py-2 text-lg font-medium transition-colors hover:text-primary hover:no-underline",
+                      link.children.some((child) => child.path === pathname)
+                        ? "text-primary"
+                        : "text-muted-foreground"
+                    )}
+                  >
+                    {link.name}
+                  </AccordionTrigger>
+                  <AccordionContent className="pb-2 pl-4">
+                    <div className="flex flex-col space-y-3">
+                      {link.children.map((child) => (
+                        <Link
+                          key={child.path}
+                          href={child.path}
+                          onClick={() => setIsOpen(false)}
+                          className={cn(
+                            'text-base font-medium transition-colors hover:text-primary',
+                            pathname === child.path
+                              ? 'text-primary'
+                              : 'text-muted-foreground'
+                          )}
+                        >
+                          {child.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ) : (
+                <Link
+                  key={link.path}
+                  href={link.path!}
+                  onClick={() => setIsOpen(false)}
+                  className={cn(
+                    'py-2 text-lg font-medium transition-colors hover:text-primary',
+                    pathname === link.path ? 'text-primary' : 'text-muted-foreground'
+                  )}
+                >
+                  {link.name}
+                </Link>
+              )
+            )}
+          </Accordion>
         </div>
         <div className="mt-8 flex flex-col space-y-2">
             <Button variant="outline" asChild>
