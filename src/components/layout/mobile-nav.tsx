@@ -7,7 +7,7 @@ import { useState } from 'react';
 import { authLinks, publicNavLinks } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Logo } from '../logo';
 import {
   Accordion,
@@ -41,7 +41,11 @@ export function MobileNav() {
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-[300px]">
-        <Logo />
+        <SheetHeader className='text-left'>
+            <SheetTitle className="sr-only">Menu</SheetTitle>
+            <Logo />
+        </SheetHeader>
+        
         <div className="mt-8 flex flex-col space-y-4">
           <Accordion type="single" collapsible className="w-full">
             {publicNavLinks.map((link) =>
