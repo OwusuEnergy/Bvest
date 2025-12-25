@@ -43,10 +43,7 @@ import { doc } from "firebase/firestore";
 
 const sidebarNav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "My Investments", href: "/dashboard/investments", icon: CandlestickChart },
-  { name: "Referrals", href: "/dashboard/referrals", icon: Users },
   { name: "Withdraw", href: "/dashboard/withdraw", icon: Banknote },
-  { name: "Transactions", href: "/dashboard/transactions", icon: ArrowLeftRight },
 ];
 
 const sidebarProfileNav = [
