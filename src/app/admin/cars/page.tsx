@@ -4,7 +4,7 @@ import { PageHeader } from "@/components/admin/page-header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { useCollection, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { Car } from "@/lib/types";
 import { collection, query, orderBy } from "firebase/firestore";
 import { PlusCircle } from "lucide-react";
@@ -14,11 +14,12 @@ import { Badge } from "@/components/ui/badge";
 
 export default function AdminCarsPage() {
     const firestore = useFirestore();
+    const { user } = useUser();
 
     const carsQuery = useMemoFirebase(() => {
-        if (!firestore) return null;
+        if (!firestore || !user) return null;
         return query(collection(firestore, 'cars'), orderBy('name'));
-    }, [firestore]);
+    }, [firestore, user]);
 
     const { data: cars, isLoading } = useCollection<Car>(carsQuery);
 

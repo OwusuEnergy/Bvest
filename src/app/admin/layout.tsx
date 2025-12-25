@@ -53,23 +53,24 @@ export default function AdminLayout({
   const auth = useAuth();
   
   const isAdmin = user?.uid === ADMIN_UID;
+  const isLoginPage = pathname === '/admin/login';
 
   useEffect(() => {
-    // Wait until the auth state is fully determined.
+    // Don't do anything while auth state is loading
     if (isUserLoading) {
       return;
     }
 
-    // If user is not an admin and not on the login page, redirect them.
-    if (!isAdmin && pathname !== '/admin/login') {
+    // If not on login page and not an admin, redirect to login
+    if (!isLoginPage && !isAdmin) {
       router.push('/admin/login');
     }
 
-    // If user is an admin and on the login page, redirect to the dashboard.
-    if (isAdmin && pathname === '/admin/login') {
+    // If on login page and already an admin, redirect to dashboard
+    if (isLoginPage && isAdmin) {
       router.push('/admin');
     }
-  }, [isUserLoading, isAdmin, pathname, router]);
+  }, [isUserLoading, isAdmin, isLoginPage, router]);
 
   const handleLogout = async () => {
     if (auth) {
@@ -78,8 +79,9 @@ export default function AdminLayout({
     }
   };
 
-  // While checking auth state, show a loader.
-  if (isUserLoading) {
+  // While loading, or if we are on a non-login page without being an admin yet, show a loader.
+  // This prevents content from flashing before the redirect happens.
+  if (isUserLoading || (!isAdmin && !isLoginPage)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -87,10 +89,8 @@ export default function AdminLayout({
     );
   }
 
-  // If the user is not an admin, let them see the login page.
-  // For any other admin route, they will be redirected by the useEffect.
-  // This also prevents the admin layout from flashing for non-admins.
-  if (!isAdmin) {
+  // If we are on the login page (and not an admin), just render the children (the login form).
+  if (isLoginPage) {
     return <>{children}</>;
   }
 
