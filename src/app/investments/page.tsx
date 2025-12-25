@@ -7,16 +7,21 @@ import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
 import { InvestmentDialog } from "@/components/investment-dialog";
 import type { Car } from "@/lib/types";
+import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
+import { collection, query, orderBy } from "firebase/firestore";
+import { Skeleton } from "@/components/ui/skeleton";
 
-
-const cars: Car[] = [
-    { id: 'suv-01', name: 'Standard SUV', roi: 12, imageId: 'car-suv', totalValue: 150000, investedAmount: 75000, description: 'A reliable and spacious SUV perfect for families and long trips.' },
-    { id: 'sedan-01', name: 'Economy Sedan', roi: 9.5, imageId: 'car-sedan', totalValue: 80000, investedAmount: 60000, description: 'An efficient and comfortable sedan ideal for city driving.' },
-    { id: 'luxury-01', name: 'Luxury Sportscar', roi: 15, imageId: 'car-luxury', totalValue: 400000, investedAmount: 120000, description: 'Experience performance and style with this premium sportscar.' },
-    { id: 'sedan-02', name: 'Comfort Sedan', roi: 10, imageId: 'car-sedan', totalValue: 95000, investedAmount: 95000, description: 'A comfortable and stylish sedan for a smooth ride.' },
-];
 
 export default function InvestmentsPage() {
+  const firestore = useFirestore();
+
+  const carsQuery = useMemoFirebase(() => {
+    if (!firestore) return null;
+    return query(collection(firestore, 'cars'), orderBy('name'));
+  }, [firestore]);
+
+  const { data: cars, isLoading } = useCollection<Car>(carsQuery);
+
   return (
     <div className="container py-12 sm:py-16 animate-fade-in">
       <div className="text-center">
@@ -30,14 +35,32 @@ export default function InvestmentsPage() {
 
       <div className="mt-12">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {cars.map((car, index) => {
+            {isLoading && Array.from({ length: 3 }).map((_, index) => (
+              <Card key={index} className="flex flex-col animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
+                <CardHeader className="p-0">
+                  <Skeleton className="h-48 w-full rounded-t-lg" />
+                </CardHeader>
+                <CardContent className="p-4 flex-grow">
+                  <Skeleton className="h-6 w-3/4 mb-2" />
+                  <Skeleton className="h-4 w-full mb-4" />
+                  <div className="text-sm text-muted-foreground">
+                    <Skeleton className="h-4 w-1/4 mb-2" />
+                    <Skeleton className="h-2 w-full" />
+                  </div>
+                </CardContent>
+                <CardFooter className="p-4">
+                  <Skeleton className="h-10 w-full" />
+                </CardFooter>
+              </Card>
+            ))}
+            {cars && cars.map((car, index) => {
                 const carImage = PlaceHolderImages.find(img => img.id === car.imageId);
-                const investmentProgress = (car.investedAmount / car.totalValue) * 100;
+                const investmentProgress = car.totalValue > 0 ? (car.investedAmount / car.totalValue) * 100 : 0;
                 return (
                     <Card key={car.id} className="flex flex-col animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
                         <CardHeader className="p-0">
                             <div className="relative h-48 w-full">
-                                {carImage && (
+                                {carImage ? (
                                     <Image
                                         src={carImage.imageUrl}
                                         alt={car.name}
@@ -45,6 +68,8 @@ export default function InvestmentsPage() {
                                         className="object-cover rounded-t-lg"
                                         data-ai-hint={carImage.imageHint}
                                     />
+                                ): (
+                                  <div className="h-full w-full bg-secondary rounded-t-lg" />
                                 )}
                                 <Badge variant="secondary" className="absolute top-2 right-2">{car.roi}% ROI</Badge>
                             </div>
