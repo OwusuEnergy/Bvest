@@ -46,7 +46,7 @@ const faqItems = [
 
 export default function HowItWorksPage() {
   return (
-    <div className="container py-12 sm:py-16">
+    <div className="container py-12 sm:py-16 animate-fade-in-up">
       <div className="text-center">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           How CarVest Works
@@ -61,7 +61,7 @@ export default function HowItWorksPage() {
           <h2 className="font-headline text-2xl font-semibold mb-6">Five Simple Steps to Start Earning</h2>
           <div className="space-y-6">
             {steps.map((step, index) => (
-              <div key={index} className="flex items-start gap-4">
+              <div key={index} className="flex items-start gap-4 animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
                   {index + 1}
                 </div>
@@ -74,7 +74,7 @@ export default function HowItWorksPage() {
           </div>
         </div>
         
-        <Card className="bg-primary/5 dark:bg-card">
+        <Card className="bg-primary/5 dark:bg-card animate-fade-in-up" style={{animationDelay: '300ms'}}>
             <CardHeader>
                 <CardTitle className="font-headline">The Process</CardTitle>
             </CardHeader>

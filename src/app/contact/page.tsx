@@ -7,7 +7,7 @@ import { Mail, Phone, MapPin } from "lucide-react";
 
 export default function ContactPage() {
   return (
-    <div className="container py-12 sm:py-16">
+    <div className="container py-12 sm:py-16 animate-fade-in-up">
       <div className="text-center">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Get in Touch
@@ -18,7 +18,7 @@ export default function ContactPage() {
       </div>
 
       <div className="mt-16 grid grid-cols-1 gap-12 lg:grid-cols-2">
-        <Card>
+        <Card className="animate-fade-in-up" style={{animationDelay: '0.2s'}}>
           <CardHeader>
             <CardTitle className="font-headline">Send us a Message</CardTitle>
           </CardHeader>
@@ -47,7 +47,7 @@ export default function ContactPage() {
           </CardContent>
         </Card>
 
-        <div className="space-y-8">
+        <div className="space-y-8 animate-fade-in-up" style={{animationDelay: '0.3s'}}>
             <h2 className="font-headline text-2xl font-semibold">Contact Information</h2>
             <div className="space-y-4 text-muted-foreground">
                 <div className="flex items-start gap-4">

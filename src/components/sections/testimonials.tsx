@@ -31,7 +31,7 @@ export function Testimonials() {
   return (
     <section className="py-12 sm:py-16">
       <div className="container">
-        <div className="text-center">
+        <div className="text-center animate-fade-in-up">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Trusted by Investors Like You
           </h2>
@@ -40,10 +40,10 @@ export function Testimonials() {
           </p>
         </div>
         <div className="mt-12 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((testimonial) => {
+          {testimonials.map((testimonial, index) => {
             const avatar = PlaceHolderImages.find(img => img.id === testimonial.avatarId);
             return (
-              <Card key={testimonial.name} className="flex flex-col">
+              <Card key={testimonial.name} className="flex flex-col animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <CardContent className="flex-grow p-6">
                   <div className="flex items-center gap-1">
                     {Array.from({ length: 5 }).map((_, i) => (

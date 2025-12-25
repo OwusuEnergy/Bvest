@@ -15,7 +15,7 @@ const cars = [
 
 export default function InvestmentsPage() {
   return (
-    <div className="container py-12 sm:py-16">
+    <div className="container py-12 sm:py-16 animate-fade-in">
       <div className="text-center">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Available Investments
@@ -28,11 +28,11 @@ export default function InvestmentsPage() {
       <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-3">
         <div className="lg:col-span-2">
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {cars.map((car) => {
+                {cars.map((car, index) => {
                     const carImage = PlaceHolderImages.find(img => img.id === car.imageId);
                     const investmentProgress = (car.investedAmount / car.totalValue) * 100;
                     return (
-                        <Card key={car.id}>
+                        <Card key={car.id} className="animate-fade-in-up" style={{animationDelay: `${index * 150}ms`}}>
                             <CardHeader className="p-0">
                                 <div className="relative h-48 w-full">
                                     {carImage && (
@@ -69,7 +69,7 @@ export default function InvestmentsPage() {
         </div>
 
         <div className="lg:col-span-1">
-          <div className="sticky top-24">
+          <div className="sticky top-24 animate-fade-in-up" style={{animationDelay: '300ms'}}>
             <RoiCalculator />
           </div>
         </div>

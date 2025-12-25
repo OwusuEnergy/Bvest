@@ -75,7 +75,7 @@ export default function FaqPage() {
   }, [searchTerm]);
 
   return (
-    <div className="container py-12 sm:py-16">
+    <div className="container py-12 sm:py-16 animate-fade-in-up">
       <div className="text-center">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Frequently Asked Questions
@@ -100,7 +100,7 @@ export default function FaqPage() {
         <Accordion type="single" collapsible className="mt-6 w-full">
           {filteredFaqs.length > 0 ? (
             filteredFaqs.map((item, index) => (
-              <AccordionItem value={`item-${index}`} key={index}>
+              <AccordionItem value={`item-${index}`} key={index} className="animate-fade-in-up" style={{animationDelay: `${index * 100}ms`}}>
                 <AccordionTrigger>{item.question}</AccordionTrigger>
                 <AccordionContent>{item.answer}</AccordionContent>
               </AccordionItem>

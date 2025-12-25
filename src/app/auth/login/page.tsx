@@ -20,7 +20,7 @@ import {
 
 export default function LoginPage() {
   return (
-    <Tabs defaultValue="login" className="w-full max-w-sm">
+    <Tabs defaultValue="login" className="w-full max-w-sm animate-fade-in-up">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="login">Sign In</TabsTrigger>
         <TabsTrigger value="create-account">Create Account</TabsTrigger>

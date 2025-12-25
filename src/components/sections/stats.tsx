@@ -29,8 +29,8 @@ export function Stats() {
     <section className="py-12 sm:py-16">
       <div className="container">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <Card key={stat.name}>
+          {stats.map((stat, index) => (
+            <Card key={stat.name} className="animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">{stat.name}</CardTitle>
                 <stat.icon className="h-5 w-5 text-muted-foreground" />

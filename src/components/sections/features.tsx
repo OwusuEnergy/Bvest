@@ -28,7 +28,7 @@ export function Features() {
   return (
     <section className="bg-muted/30 py-12 sm:py-16">
       <div className="container">
-        <div className="text-center">
+        <div className="text-center animate-fade-in-up">
           <h2 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
             Everything You Need for Smart Investing
           </h2>
@@ -37,8 +37,8 @@ export function Features() {
           </p>
         </div>
         <div className="mt-12 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => (
-            <Card key={feature.title} className="text-center">
+          {features.map((feature, index) => (
+            <Card key={feature.title} className="text-center animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
               <CardHeader>
                 <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground">
                   <feature.icon className="h-6 w-6" />

@@ -35,7 +35,7 @@ export default function AboutPage() {
   const storyImage = PlaceHolderImages.find((img) => img.id === 'car-suv');
 
   return (
-    <div className="container py-12 sm:py-16">
+    <div className="container py-12 sm:py-16 animate-fade-in-up">
       <div className="text-center">
         <h1 className="font-headline text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
           Driving Financial Freedom in Ghana
@@ -61,7 +61,7 @@ export default function AboutPage() {
               src={storyImage.imageUrl}
               alt="CarVest Story"
               fill
-              className="rounded-lg object-cover shadow-lg"
+              className="rounded-lg object-cover shadow-lg animate-fade-in"
               data-ai-hint={storyImage.imageHint}
             />
           )}
@@ -69,7 +69,7 @@ export default function AboutPage() {
       </div>
 
       <div className="mt-20">
-        <Card className="bg-primary/5 dark:bg-card">
+        <Card className="bg-primary/5 dark:bg-card animate-fade-in-up" style={{animationDelay: '0.2s'}}>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 font-headline">
               <Target className="h-6 w-6 text-primary" />
@@ -100,10 +100,10 @@ export default function AboutPage() {
           </p>
         </div>
         <div className="mt-10 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {teamMembers.map((member) => {
+          {teamMembers.map((member, index) => {
             const avatar = PlaceHolderImages.find(img => img.id === member.avatarId);
             return (
-              <Card key={member.name} className="text-center">
+              <Card key={member.name} className="text-center animate-fade-in-up" style={{animationDelay: `${0.3 + index * 0.1}s`}}>
                 <CardContent className="p-6">
                   {avatar && 
                     <Avatar className="h-24 w-24 mx-auto mb-4">

@@ -66,10 +66,10 @@ const portfolioData = [
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-6 animate-fade-in-up">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {statsCards.map((card) => (
-          <Card key={card.title}>
+        {statsCards.map((card, index) => (
+          <Card key={card.title} className="animate-fade-in-up" style={{animationDelay: `${index * 100}ms`}}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">{card.title}</CardTitle>
               <card.icon className="h-4 w-4 text-muted-foreground" />
@@ -81,7 +81,7 @@ export default function DashboardPage() {
         ))}
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
+        <Card className="lg:col-span-3 animate-fade-in-up" style={{animationDelay: '400ms'}}>
           <CardHeader>
             <CardTitle className="font-headline">Recent Transactions</CardTitle>
             <CardDescription>
@@ -115,7 +115,7 @@ export default function DashboardPage() {
             </Table>
           </CardContent>
         </Card>
-        <Card className="lg:col-span-2">
+        <Card className="lg:col-span-2 animate-fade-in-up" style={{animationDelay: '500ms'}}>
           <CardHeader>
             <CardTitle className="font-headline">Portfolio Summary</CardTitle>
             <CardDescription>
