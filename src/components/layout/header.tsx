@@ -169,7 +169,32 @@ export function Header() {
             )}
           </div>
         </div>
-        <div className="flex flex-1 items-center justify-end md:hidden">
+        <div className="flex flex-1 items-center justify-end gap-2 md:hidden">
+           {user && !isUserLoading && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" size="icon">
+                  <Wallet className="h-5 w-5" />
+                  <span className="sr-only">Open wallet menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">Wallet Balance</p>
+                    <p className="text-lg font-semibold leading-none text-foreground">{formatCurrency(userProfile?.balance)}</p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                 <DepositDialog user={user}>
+                    <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Deposit</DropdownMenuItem>
+                </DepositDialog>
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/withdraw">Withdraw</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           <ThemeToggle />
           <MobileNav />
         </div>
