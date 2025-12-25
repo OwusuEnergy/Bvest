@@ -47,6 +47,8 @@ export default function AdminLoginPage() {
             try {
                 // If the user doesn't exist, create it.
                 await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
+                // After creating, sign in again to be sure
+                await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
                 router.push('/admin');
             } catch (creationError: any) {
                  toast({
