@@ -45,7 +45,7 @@ const sidebarNav = [
 
 const sidebarProfileNav = [
   { name: "Profile", href: "/dashboard/profile", icon: User },
-  { name "Security", href: "/dashboard/security", icon: Shield },
+  { name: "Security", href: "/dashboard/security", icon: Shield },
 ];
 
 export default function DashboardLayout({
