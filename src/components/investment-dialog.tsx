@@ -25,9 +25,9 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const investmentPlans = [
-  { name: 'Silver', amount: 100, description: 'A great starting point', colorClass: 'border-slate-300 dark:border-slate-600' },
-  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', colorClass: 'border-amber-600 dark:border-amber-500' },
-  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', colorClass: 'border-yellow-500 dark:border-yellow-400' },
+  { name: 'Silver', amount: 100, description: 'A great starting point', colorClass: 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800' },
+  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', colorClass: 'border-amber-600 dark:border-amber-500 bg-amber-100 dark:bg-amber-900/40' },
+  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', colorClass: 'border-yellow-500 dark:border-yellow-400 bg-yellow-100 dark:bg-yellow-900/40' },
 ];
 
 export function InvestmentDialog({ car }: { car: Car }) {
@@ -127,7 +127,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
                 key={plan.name}
                 onClick={() => setSelectedPlan(plan)}
                 className={cn(
-                    'cursor-pointer transition-all hover:bg-muted/50 border-2',
+                    'cursor-pointer transition-all hover:scale-105 border-2',
                     plan.colorClass,
                     selectedPlan?.name === plan.name ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'border-transparent'
                 )}
