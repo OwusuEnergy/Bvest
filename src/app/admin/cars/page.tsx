@@ -2,7 +2,7 @@
 'use client';
 
 import { PageHeader } from '@/components/admin/page-header';
-import { Button } from '@/components/ui/button';
+import { AddCarDialog } from '@/components/admin/add-car-dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCollection, useFirestore, useMemoFirebase } from '@/firebase';
@@ -29,7 +29,7 @@ export default function AdminCarsPage() {
     <div>
       <div className="flex justify-between items-center">
         <PageHeader title="Manage Cars" description="View, add, or edit cars available for investment." />
-        <Button>Add New Car</Button>
+        <AddCarDialog />
       </div>
 
       <Card>
