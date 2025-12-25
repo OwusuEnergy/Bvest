@@ -43,7 +43,6 @@ import { useEffect } from "react";
 
 const sidebarNav = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Invest", href: "/dashboard/invest", icon: Cedi },
   { name: "My Investments", href: "/dashboard/investments", icon: CandlestickChart },
   { name: "Referrals", href: "/dashboard/referrals", icon: Users },
   { name: "Withdraw", href: "/dashboard/withdraw", icon: Banknote },
@@ -88,10 +87,13 @@ export default function DashboardLayout({
   const getInitials = (name?: string | null) => {
     if (!name) return '';
     const nameParts = name.split(' ');
-    if (nameParts.length > 1) {
+    if (nameParts.length > 1 && nameParts[0] && nameParts[nameParts.length - 1]) {
       return `${nameParts[0][0]}${nameParts[nameParts.length - 1][0]}`;
     }
-    return name[0];
+    if (nameParts[0]) {
+       return nameParts[0][0];
+    }
+    return '';
   }
 
   return (
