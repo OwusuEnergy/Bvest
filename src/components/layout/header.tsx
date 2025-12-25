@@ -13,12 +13,15 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, LogOut, Wallet } from 'lucide-react';
 import { useUser, useAuth, useFirestore, useDoc, useMemoFirebase } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { doc } from 'firebase/firestore';
+import { DepositDialog } from '../deposit-dialog';
 
 export function Header() {
   const pathname = usePathname();
@@ -103,13 +106,34 @@ export function Header() {
               <div className='w-[180px] h-10 bg-muted rounded-md animate-pulse' />
             ) : user ? (
               <>
-                 <div className="flex items-center gap-2 border-r pr-4 mr-2">
-                  <Wallet className="h-5 w-5 text-muted-foreground" />
-                  <span className="font-semibold">{formatCurrency(userProfile?.balance)}</span>
-                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <Wallet className="h-5 w-5" />
+                      <span className="sr-only">Open wallet menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">Wallet Balance</p>
+                        <p className="text-lg font-semibold leading-none text-foreground">{formatCurrency(userProfile?.balance)}</p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DepositDialog user={user}>
+                       <DropdownMenuItem onSelect={(e) => e.preventDefault()}>Deposit</DropdownMenuItem>
+                    </DepositDialog>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard/withdraw">Withdraw</Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <Button variant="outline" asChild>
                   <Link href={authLinks.dashboard}>Dashboard</Link>
                 </Button>
+                
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="relative h-8 w-8 rounded-full">

@@ -180,16 +180,6 @@ export default function DashboardLayout({
               {/* Add breadcrumbs or page title here */}
             </div>
              <div className="flex items-center gap-4">
-              <div className="hidden sm:flex items-center gap-2">
-                <Wallet className="h-5 w-5 text-muted-foreground" />
-                <span className="font-semibold">{formatCurrency(userProfile?.balance)}</span>
-              </div>
-              <Button asChild variant="outline">
-                <Link href="/dashboard/withdraw">Withdraw</Link>
-              </Button>
-              <DepositDialog user={user}>
-                <Button>Deposit</Button>
-              </DepositDialog>
               <ThemeToggle />
             </div>
         </header>
