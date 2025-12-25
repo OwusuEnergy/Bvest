@@ -55,21 +55,21 @@ export default function AdminLayout({
   const isAdmin = user?.uid === ADMIN_UID;
 
   useEffect(() => {
-    // This effect handles redirection based on authentication state.
-    if (!isUserLoading) {
-      if (isAdmin) {
-        // If user is admin and on the login page, redirect to dashboard.
-        if (pathname === '/admin/login') {
-          router.push('/admin');
-        }
-      } else {
-        // If user is not admin (or not logged in) and not on the login page, redirect them there.
-        if (pathname !== '/admin/login') {
-          router.push('/admin/login');
-        }
-      }
+    // Wait until the auth state is fully determined.
+    if (isUserLoading) {
+      return;
     }
-  }, [isUserLoading, user, isAdmin, router, pathname]);
+
+    // If user is not an admin and not on the login page, redirect them.
+    if (!isAdmin && pathname !== '/admin/login') {
+      router.push('/admin/login');
+    }
+
+    // If user is an admin and on the login page, redirect to the dashboard.
+    if (isAdmin && pathname === '/admin/login') {
+      router.push('/admin');
+    }
+  }, [isUserLoading, isAdmin, pathname, router]);
 
   const handleLogout = async () => {
     if (auth) {
@@ -78,7 +78,7 @@ export default function AdminLayout({
     }
   };
 
-  // If auth state is still loading, show a full-screen loader.
+  // While checking auth state, show a loader.
   if (isUserLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -87,32 +87,14 @@ export default function AdminLayout({
     );
   }
 
-  // If the user is not an admin and is trying to access a non-login page,
-  // we show the loading screen while the useEffect above redirects them.
-  // This prevents flashing the admin layout to non-admins.
-  if (!isAdmin && pathname !== '/admin/login') {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  // Allow the login page to be rendered without the admin layout shell.
-  if (!isAdmin && pathname === '/admin/login') {
+  // If the user is not an admin, let them see the login page.
+  // For any other admin route, they will be redirected by the useEffect.
+  // This also prevents the admin layout from flashing for non-admins.
+  if (!isAdmin) {
     return <>{children}</>;
   }
-  
-  if (isAdmin && pathname === '/admin/login') {
-     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-      </div>
-    );
-  }
 
-  // If we've made it here, the user is an admin and not on the login page.
-  // Render the full admin layout.
+  // If we've made it here, the user is a confirmed admin. Render the full layout.
   return (
     <SidebarProvider>
       <Sidebar>
