@@ -1,8 +1,11 @@
+'use client';
+
 import { Button } from "../ui/button";
 import { authLinks } from "@/lib/constants";
 import Link from "next/link";
 import { PlaceHolderImages } from "@/lib/placeholder-images";
 import Image from "next/image";
+import { useUser } from "@/firebase";
 
 const steps = [
   {
@@ -29,6 +32,7 @@ const steps = [
 
 export function HowItWorks() {
     const suvImage = PlaceHolderImages.find(img => img.id === 'car-suv');
+    const { user, isUserLoading } = useUser();
 
     return (
     <section className="py-12 sm:py-16">
@@ -67,11 +71,13 @@ export function HowItWorks() {
                     ))}
                 </div>
             </div>
-            <div className="text-center mt-12 animate-fade-in-up" style={{animationDelay: '800ms'}}>
-                <Button size="lg" asChild>
-                    <Link href={authLinks.signup}>Start Investing Today</Link>
-                </Button>
-            </div>
+            {!isUserLoading && !user && (
+                <div className="text-center mt-12 animate-fade-in-up" style={{animationDelay: '800ms'}}>
+                    <Button size="lg" asChild>
+                        <Link href={authLinks.signup}>Start Investing Today</Link>
+                    </Button>
+                </div>
+            )}
         </div>
     </section>
   );
