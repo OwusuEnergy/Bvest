@@ -20,6 +20,7 @@ import {
   Users,
   TrendingUp,
   Wallet,
+  Copy,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
@@ -27,13 +28,8 @@ import { collection, doc, query, orderBy, Timestamp, limit } from "firebase/fire
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { format, differenceInDays, addMonths, parseISO, formatDistanceToNow } from 'date-fns';
 import { Progress } from "@/components/ui/progress";
-
-const recentReferrals = [
-    { name: 'Kofi Mensah', level: 1, earnings: 'GH₵ 50.00', status: 'Active', date: '2 days ago' },
-    { name: 'Ama Serwaa', level: 2, earnings: 'GH₵ 15.50', status: 'Active', date: '1 day ago' },
-    { name: 'Esi Nana', level: 1, earnings: 'GH₵ 75.00', status: 'Active', date: '5 hours ago' },
-    { name: 'Kwame Addo', level: 3, earnings: 'GH₵ 5.00', status: 'Pending', date: '3 days ago' },
-];
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 
 const profitData = [
   { date: 'Jan', profit: 120 },
@@ -47,13 +43,14 @@ const profitData = [
 export default function DashboardPage() {
   const { user } = useUser();
   const firestore = useFirestore();
+  const { toast } = useToast();
 
   const userProfileRef = useMemoFirebase(() => {
     if (!firestore || !user) return null;
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
-  const { data: userProfile } = useDoc<{balance: number, totalEarned: number}>(userProfileRef);
+  const { data: userProfile } = useDoc<{balance: number, totalEarned: number, referralCode: string, referralEarnings: number}>(userProfileRef);
 
   const investmentsQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -69,9 +66,27 @@ export default function DashboardPage() {
 
   const { data: recentTransactions } = useCollection(transactionsQuery);
 
+  const referralsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(collection(firestore, `users/${user.uid}/referrals`), orderBy('createdAt', 'desc'));
+  }, [firestore, user]);
+
+  const { data: referrals } = useCollection(referralsQuery);
+
+
   const formatCurrency = (amount: number = 0) => {
     return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS', currencyDisplay: 'symbol' }).format(amount);
   }
+
+  const copyReferralLink = () => {
+    if (!userProfile?.referralCode) return;
+    const url = `${window.location.origin}/auth/login?ref=${userProfile.referralCode}`;
+    navigator.clipboard.writeText(url);
+    toast({
+      title: "Referral Link Copied!",
+      description: "You can now share your link with friends.",
+    });
+  };
 
   const totalInvestments = investments?.reduce((acc, inv) => acc + inv.amount, 0) || 0;
 
@@ -93,7 +108,7 @@ export default function DashboardPage() {
     },
     {
       title: "Referral Earnings",
-      amount: "GH₵ 500.00", // This would also come from user data
+      amount: formatCurrency(userProfile?.referralEarnings),
       icon: Users,
     },
   ];
@@ -161,30 +176,16 @@ export default function DashboardPage() {
         <div className="lg:col-span-1 flex flex-col gap-8">
              <Card className="animate-fade-in-up" style={{animationDelay: '400ms'}}>
                 <CardHeader>
-                    <CardTitle className="font-headline">Recent Referrals</CardTitle>
+                    <CardTitle className="font-headline">Your Referral Link</CardTitle>
                     <CardDescription>
-                    A quick look at your referral network.
+                      Share this link with friends to earn commissions.
                     </CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <Table>
-                    <TableHeader>
-                        <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Level</TableHead>
-                        <TableHead>Earnings</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {recentReferrals.slice(0, 4).map((ref, i) => (
-                        <TableRow key={i}>
-                            <TableCell className="font-medium">{ref.name}</TableCell>
-                            <TableCell>Level {ref.level}</TableCell>
-                            <TableCell>{ref.earnings}</TableCell>
-                        </TableRow>
-                        ))}
-                    </TableBody>
-                    </Table>
+                <CardContent className="flex items-center gap-2">
+                    <Input readOnly value={`${typeof window !== 'undefined' ? window.location.origin : ''}/auth/login?ref=${userProfile?.referralCode || ''}`} className="bg-muted" />
+                    <Button size="icon" variant="ghost" onClick={copyReferralLink}>
+                      <Copy className="h-4 w-4" />
+                    </Button>
                 </CardContent>
             </Card>
         </div>
@@ -269,11 +270,11 @@ export default function DashboardPage() {
                         {recentTransactions && recentTransactions.map((txn, i) => (
                         <TableRow key={txn.id}>
                             <TableCell>
-                                <Badge variant={txn.type === 'Investment' ? 'secondary' : 'default'}>
+                                <Badge variant={txn.type === 'Investment' ? 'secondary' : (txn.type === 'Referral Bonus' ? 'default' : 'outline')}>
                                     {txn.type}
                                 </Badge>
                             </TableCell>
-                            <TableCell className="font-medium">{formatCurrency(txn.amount)}</TableCell>
+                            <TableCell className={`font-medium ${txn.type === 'Referral Bonus' ? 'text-green-500' : ''}`}>{formatCurrency(txn.amount)}</TableCell>
                             <TableCell>{txn.description}</TableCell>
                             <TableCell className="text-muted-foreground">{formatDistanceToNowFromTimestamp(txn.createdAt)}</TableCell>
                         </TableRow>
@@ -281,6 +282,43 @@ export default function DashboardPage() {
                          {(!recentTransactions || recentTransactions.length === 0) && (
                             <TableRow>
                                 <TableCell colSpan={4} className="text-center h-24">You have no recent transactions.</TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+       </div>
+       <div className="grid grid-cols-1 gap-8">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline">Your Referrals</CardTitle>
+                    <CardDescription>
+                    Users you have referred and your earnings from them.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Date Joined</TableHead>
+                        <TableHead>Total Earned</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {referrals && referrals.map((ref, i) => (
+                        <TableRow key={ref.id}>
+                            <TableCell className="font-medium">{ref.referredName}</TableCell>
+                            <TableCell>{ref.referredEmail}</TableCell>
+                            <TableCell>{formatDateFromTimestamp(ref.createdAt)}</TableCell>
+                            <TableCell>{formatCurrency(ref.earned)}</TableCell>
+                        </TableRow>
+                        ))}
+                         {(!referrals || referrals.length === 0) && (
+                            <TableRow>
+                                <TableCell colSpan={4} className="text-center h-24">You have not referred anyone yet.</TableCell>
                             </TableRow>
                         )}
                     </TableBody>

@@ -46,7 +46,15 @@
         },
         "referredById": {
           "type": "string",
-          "description": "Reference to the User who referred this user. (Relationship: User 1:N User)"
+          "description": "ID of the user who referred this user."
+        },
+        "referralEarnings": {
+            "type": "number",
+            "description": "Total earnings from referrals."
+        },
+        "totalInvested": {
+            "type": "number",
+            "description": "Total amount invested by the user."
         },
         "createdAt": {
           "type": "string",
@@ -214,7 +222,15 @@
         },
         "referredId": {
           "type": "string",
-          "description": "Reference to User who was referred. (Relationship: User 1:N Referral)"
+          "description": "Reference to User who was referred."
+        },
+         "referredName": {
+          "type": "string",
+          "description": "Name of the user who was referred."
+        },
+         "referredEmail": {
+          "type": "string",
+          "description": "Email of the user who was referred."
         },
         "level": {
           "type": "number",

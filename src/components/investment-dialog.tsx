@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/dialog';
 import { Card, CardContent } from '@/components/ui/card';
 import { useAuth, useDoc, useFirestore, useMemoFirebase, useUser } from '@/firebase';
-import { addDoc, collection, doc, serverTimestamp, updateDoc, writeBatch } from 'firebase/firestore';
+import { addDoc, collection, doc, serverTimestamp, updateDoc, writeBatch, increment, getDoc, query, where, getDocs } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
 import { authLinks } from '@/lib/constants';
@@ -45,7 +45,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
-  const { data: userProfile } = useDoc<{balance: number}>(userProfileRef);
+  const { data: userProfile } = useDoc<{balance: number, referredById?: string, totalInvested?: number}>(userProfileRef);
 
   const handleInvest = async () => {
     if (!user) {
@@ -77,36 +77,35 @@ export function InvestmentDialog({ car }: { car: Car }) {
     setIsLoading(true);
 
     try {
-      const newBalance = userProfile.balance - selectedPlan.amount;
-      
       const batch = writeBatch(firestore);
-
-      // 1. Deduct from balance
       const userDocRef = doc(firestore, 'users', user.uid);
-      batch.update(userDocRef, { balance: newBalance });
+
+      // 1. Handle main investment transaction
+      const newBalance = userProfile.balance - selectedPlan.amount;
+      batch.update(userDocRef, { 
+        balance: newBalance,
+        totalInvested: increment(selectedPlan.amount)
+      });
       
-      // 2. Create investment record
       const investmentsColRef = collection(firestore, `users/${user.uid}/investments`);
-      const newInvestmentRef = doc(investmentsColRef); // Create a ref to get the ID
+      const newInvestmentRef = doc(investmentsColRef);
       batch.set(newInvestmentRef, {
         userId: user.uid,
         carId: car.id,
         carName: car.name,
         amount: selectedPlan.amount,
-        duration: 12, // Default duration, can be customized
+        duration: 12,
         roi: car.roi,
         startDate: serverTimestamp(),
-        endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)), // 1 year from now
+        endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
         status: 'Active',
-        dailyProfit: 0, // Should be calculated by a backend process
+        dailyProfit: 0,
         totalProfit: 0,
         createdAt: serverTimestamp(),
       });
       
-      // 3. Create transaction record
       const transactionsColRef = collection(firestore, `users/${user.uid}/transactions`);
-      const newTransactionRef = doc(transactionsColRef);
-      batch.set(newTransactionRef, {
+      batch.set(doc(transactionsColRef), {
         userId: user.uid,
         type: 'Investment',
         amount: selectedPlan.amount,
@@ -115,11 +114,53 @@ export function InvestmentDialog({ car }: { car: Car }) {
         createdAt: serverTimestamp(),
       });
 
+      // 2. Handle referral commission
+      const isFirstInvestment = (userProfile.totalInvested || 0) === 0;
+      if (userProfile.referredById && isFirstInvestment) {
+        const commissionAmount = selectedPlan.amount * 0.30;
+        const referrerRef = doc(firestore, 'users', userProfile.referredById);
+        const referrerDoc = await getDoc(referrerRef);
+
+        if (referrerDoc.exists()) {
+          const referrerData = referrerDoc.data();
+          const referrerNewBalance = (referrerData.balance || 0) + commissionAmount;
+          
+          batch.update(referrerRef, {
+            balance: increment(commissionAmount),
+            totalEarned: increment(commissionAmount),
+            referralEarnings: increment(commissionAmount),
+          });
+
+          // Create transaction for referrer
+          const referrerTransactionsRef = collection(firestore, `users/${userProfile.referredById}/transactions`);
+          batch.set(doc(referrerTransactionsRef), {
+            userId: userProfile.referredById,
+            type: 'Referral Bonus',
+            amount: commissionAmount,
+            balanceAfter: referrerNewBalance,
+            description: `30% commission from ${userProfile.name || user.displayName}'s first investment.`,
+            createdAt: serverTimestamp(),
+          });
+
+          // Update the referral document
+          const referralQuery = query(
+            collection(firestore, `users/${userProfile.referredById}/referrals`),
+            where('referredId', '==', user.uid)
+          );
+          const referralSnapshot = await getDocs(referralQuery);
+          if (!referralSnapshot.empty) {
+            const referralDocRef = referralSnapshot.docs[0].ref;
+            batch.update(referralDocRef, {
+              earned: increment(commissionAmount)
+            });
+          }
+        }
+      }
+
       await batch.commit();
 
       setIsSuccess(true);
-      // Reset after a delay
-       setTimeout(() => {
+      setTimeout(() => {
         setOpen(false);
         setIsSuccess(false);
         setSelectedPlan(null);

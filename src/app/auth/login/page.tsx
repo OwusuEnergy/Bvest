@@ -30,17 +30,17 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore, useMemoFirebase } from '@/firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   updateProfile,
 } from 'firebase/auth';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { useState } from 'react';
-import { doc, serverTimestamp, setDoc } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { collection, doc, getDocs, query, serverTimestamp, setDoc, where, writeBatch } from 'firebase/firestore';
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -60,7 +60,10 @@ export default function LoginPage() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  const refCode = searchParams.get('ref');
 
   const loginForm = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -91,24 +94,63 @@ export default function LoginPage() {
   const handleSignup = async (values: z.infer<typeof signupSchema>) => {
     setIsLoading(true);
     try {
+      let referrerId: string | null = null;
+      if (refCode) {
+        const usersRef = collection(firestore, 'users');
+        const q = query(usersRef, where('referralCode', '==', refCode));
+        const querySnapshot = await getDocs(q);
+        if (!querySnapshot.empty) {
+          const referrerDoc = querySnapshot.docs[0];
+          referrerId = referrerDoc.id;
+        } else {
+          toast({
+            variant: 'destructive',
+            title: 'Invalid Referral Code',
+            description: 'The referral code you used is not valid.',
+          });
+        }
+      }
+
       const userCredential = await createUserWithEmailAndPassword(auth, values.email, values.password);
       const user = userCredential.user;
 
-      // Update Firebase Auth profile
       await updateProfile(user, { displayName: values.name });
 
-      // Create user document in Firestore
+      const batch = writeBatch(firestore);
+
       const userDocRef = doc(firestore, 'users', user.uid);
-      await setDoc(userDocRef, {
+      const userData: any = {
         id: user.uid,
         name: values.name,
         email: values.email,
         balance: 0,
         totalEarned: 0,
         referralCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
+        referralEarnings: 0,
         createdAt: serverTimestamp(),
         updatedAt: serverTimestamp(),
-      });
+      };
+
+      if (referrerId) {
+        userData.referredById = referrerId;
+      }
+      batch.set(userDocRef, userData);
+
+      if (referrerId) {
+        const referralRef = doc(collection(firestore, `users/${referrerId}/referrals`));
+        batch.set(referralRef, {
+            referredId: user.uid,
+            referredName: values.name,
+            referredEmail: values.email,
+            level: 1,
+            commissionRate: 0.30, // 30%
+            earned: 0,
+            status: 'active',
+            createdAt: serverTimestamp()
+        });
+      }
+
+      await batch.commit();
 
       router.push(authLinks.dashboard);
     } catch (error: any) {
@@ -121,6 +163,7 @@ export default function LoginPage() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <Tabs defaultValue="login" className="w-full max-w-sm animate-fade-in-up">
@@ -191,6 +234,7 @@ export default function LoginPage() {
             </CardTitle>
             <CardDescription>
               Create an account to start investing.
+              {refCode && <p className="mt-2 text-sm text-primary">You are signing up with referral code: <strong>{refCode}</strong></p>}
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
