@@ -23,6 +23,7 @@ import {
   Shield,
   LogOut,
   Menu,
+  Wallet,
 } from "lucide-react";
 import { Cedi } from "@/components/cedi-icon";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -130,7 +131,14 @@ export default function DashboardLayout({
             <div className="flex-1">
               {/* Add breadcrumbs or page title here */}
             </div>
-            <ThemeToggle />
+             <div className="flex items-center gap-4">
+              <div className="hidden sm:flex items-center gap-2">
+                <Wallet className="h-5 w-5 text-muted-foreground" />
+                <span className="font-semibold">GHS 12,345.67</span>
+              </div>
+              <Button>Deposit</Button>
+              <ThemeToggle />
+            </div>
         </header>
         <main className="flex-1 p-4 md:p-6">{children}</main>
       </SidebarInset>
