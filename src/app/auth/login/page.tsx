@@ -34,8 +34,6 @@ import { useAuth } from '@/firebase';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  GoogleAuthProvider,
-  signInWithPopup,
 } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
@@ -55,7 +53,6 @@ const signupSchema = z.object({
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
-  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showSignupPassword, setShowSignupPassword] = useState(false);
   const auth = useAuth();
@@ -105,23 +102,6 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    const provider = new GoogleAuthProvider();
-    try {
-      await signInWithPopup(auth, provider);
-      router.push(authLinks.dashboard);
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Google Sign-In Failed',
-        description: error.message,
-      });
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
   return (
     <Tabs defaultValue="login" className="w-full max-w-sm animate-fade-in-up">
       <TabsList className="grid w-full grid-cols-2">
@@ -137,20 +117,6 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-            <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isGoogleLoading || isLoading}>
-              {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Login with Google
-            </Button>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
             <Form {...loginForm}>
               <form onSubmit={loginForm.handleSubmit(handleLogin)} className="grid gap-4">
                 <FormField
@@ -188,7 +154,7 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                 <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
+                 <Button type="submit" className="w-full" disabled={isLoading}>
                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Sign In
                 </Button>
@@ -208,20 +174,6 @@ export default function LoginPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4">
-             <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={isGoogleLoading || isLoading}>
-               {isGoogleLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-              Sign up with Google
-            </Button>
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t" />
-              </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-card px-2 text-muted-foreground">
-                  Or continue with
-                </span>
-              </div>
-            </div>
             <Form {...signupForm}>
               <form onSubmit={signupForm.handleSubmit(handleSignup)} className="grid gap-4">
                  <FormField
@@ -272,7 +224,7 @@ export default function LoginPage() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="w-full" disabled={isLoading || isGoogleLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Create Account
                 </Button>
