@@ -25,9 +25,9 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const investmentPlans = [
-  { name: 'Silver', amount: 100, description: 'A great starting point', colorClass: 'border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-800' },
-  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', colorClass: 'border-amber-600 dark:border-amber-500 bg-amber-100 dark:bg-amber-900/40' },
-  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', colorClass: 'border-yellow-500 dark:border-yellow-400 bg-yellow-100 dark:bg-yellow-900/40' },
+  { name: 'Silver', amount: 100, description: 'A great starting point', colorClass: 'border-slate-300 dark:border-slate-600 from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 bg-gradient-to-br' },
+  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', colorClass: 'border-amber-600 dark:border-amber-500 from-amber-100 to-amber-200 dark:from-amber-900/40 dark:to-amber-900/70 bg-gradient-to-br' },
+  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', colorClass: 'border-yellow-500 dark:border-yellow-400 from-yellow-100 to-yellow-200 dark:from-yellow-900/40 dark:to-yellow-900/70 bg-gradient-to-br' },
 ];
 
 export function InvestmentDialog({ car }: { car: Car }) {
@@ -137,7 +137,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
                     <h4 className="font-semibold">{plan.name} Plan</h4>
                     <p className="text-sm text-muted-foreground">{plan.description}</p>
                     </div>
-                    <p className="text-lg font-bold">GHS {plan.amount}</p>
+                    <p className="text-lg font-bold">GH₵ {plan.amount}</p>
                 </CardContent>
                 </Card>
             ))}
@@ -151,7 +151,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
                 </DialogClose>
                 <Button onClick={handleInvest} disabled={!selectedPlan || isLoading}>
                     {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isLoading ? 'Processing...' : `Invest GHS ${selectedPlan?.amount || ''}`}
+                    {isLoading ? 'Processing...' : `Invest GH₵ ${selectedPlan?.amount || ''}`}
                 </Button>
             </DialogFooter>
         )}
