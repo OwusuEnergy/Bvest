@@ -55,30 +55,31 @@ export default function AdminLayout({
   const isAdmin = user?.uid === ADMIN_UID;
 
   useEffect(() => {
-    // Wait until auth state is resolved
+    // This effect handles redirection based on authentication state.
     if (!isUserLoading) {
-      // If not authenticated or not the admin, redirect to login
-      if (!user || user.uid !== ADMIN_UID) {
+      if (isAdmin) {
+        // If user is admin and on the login page, redirect to dashboard.
+        if (pathname === '/admin/login') {
+          router.push('/admin');
+        }
+      } else {
+        // If user is not admin (or not logged in) and not on the login page, redirect them there.
         if (pathname !== '/admin/login') {
-            router.push('/admin/login');
+          router.push('/admin/login');
         }
       }
     }
-  }, [isUserLoading, user, router, pathname]);
-
+  }, [isUserLoading, user, isAdmin, router, pathname]);
 
   const handleLogout = async () => {
-    await signOut(auth);
-    router.push('/admin/login');
+    if (auth) {
+      await signOut(auth);
+      router.push('/admin/login');
+    }
   };
 
-  // If we are on the login page, render children directly without the layout shell.
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
-  }
-
-
-  if (isUserLoading || !isAdmin) {
+  // If auth state is still loading, show a full-screen loader.
+  if (isUserLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -86,6 +87,32 @@ export default function AdminLayout({
     );
   }
 
+  // If the user is not an admin and is trying to access a non-login page,
+  // we show the loading screen while the useEffect above redirects them.
+  // This prevents flashing the admin layout to non-admins.
+  if (!isAdmin && pathname !== '/admin/login') {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // Allow the login page to be rendered without the admin layout shell.
+  if (!isAdmin && pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+  
+  if (isAdmin && pathname === '/admin/login') {
+     return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If we've made it here, the user is an admin and not on the login page.
+  // Render the full admin layout.
   return (
     <SidebarProvider>
       <Sidebar>
