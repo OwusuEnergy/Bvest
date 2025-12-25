@@ -2,7 +2,7 @@
 'use client';
 
 import { useUser } from '@/firebase';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
 import {
@@ -18,7 +18,6 @@ import {
 import { Logo } from "@/components/logo";
 import { adminNavLinks } from "@/lib/constants";
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
 
 const ADMIN_UID = "L29dCjetU2WAK2G5QcIWu5TrCg33"; // Pre-defined admin UID
 
@@ -32,18 +31,31 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   useEffect(() => {
-    // If loading, do nothing yet.
+    // Wait until the user's auth state is fully loaded
     if (isUserLoading) {
       return;
     }
 
-    // If not logged in, or if logged-in user is not the admin, redirect to admin login
-    if (!user || user.uid !== ADMIN_UID) {
-      router.replace('/admin/login');
-    }
-  }, [user, isUserLoading, router]);
+    const isAdminPage = pathname.startsWith('/admin');
+    const isLoginPage = pathname === '/admin/login';
 
-  // While loading, show a full-screen loader
+    // If there's no user or the user is not the admin
+    if (!user || user.uid !== ADMIN_UID) {
+      // And they are trying to access any admin page that ISN'T the login page,
+      // redirect them to the login page.
+      if (isAdminPage && !isLoginPage) {
+        router.replace('/admin/login');
+      }
+    } else {
+      // If the user IS the admin and they are on the login page,
+      // redirect them to the admin dashboard.
+      if (isLoginPage) {
+        router.replace('/admin');
+      }
+    }
+  }, [user, isUserLoading, router, pathname]);
+
+  // While loading, show a full-screen loader to prevent content flash
   if (isUserLoading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -52,13 +64,18 @@ export default function AdminLayout({
     );
   }
 
-  // If user is loaded but is not the admin, they will be redirected by the effect.
+  // If on the login page, just render the children (the login form)
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
+  // If user is loaded but is not the admin, they are being redirected.
   // Render nothing here to prevent content flashing.
   if (!user || user.uid !== ADMIN_UID) {
     return null;
   }
 
-  // If we reach here, user is authenticated as admin
+  // If we reach here, user is the authenticated admin, show the dashboard layout
   return (
       <SidebarProvider>
         <Sidebar>

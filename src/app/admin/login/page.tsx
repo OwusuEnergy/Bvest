@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -9,11 +9,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 
 const ADMIN_EMAIL = 'admin@carvest.com';
 const ADMIN_MAGIC_CODE = '0596352632';
+const ADMIN_UID = "L29dCjetU2WAK2G5QcIWu5TrCg33";
 
 export default function AdminLoginPage() {
   const [code, setCode] = useState('');
@@ -21,6 +22,15 @@ export default function AdminLoginPage() {
   const router = useRouter();
   const { toast } = useToast();
   const auth = useAuth();
+  const { user, isUserLoading } = useUser();
+
+  // Redirect if admin is already logged in
+  useEffect(() => {
+    if (!isUserLoading && user && user.uid === ADMIN_UID) {
+      router.replace('/admin');
+    }
+  }, [user, isUserLoading, router]);
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,19 +45,24 @@ export default function AdminLoginPage() {
 
     setIsLoading(true);
     try {
+        // Attempt to sign in first
         await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
-        router.push('/admin');
+        router.replace('/admin'); // Use replace to avoid back button issues
     } catch (error: any) {
+        // If user does not exist, create them
         if (error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
             try {
+                // This will fail if the UID is already taken, which is fine.
+                // We are primarily concerned with creating the admin if they don't exist.
                 await createUserWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
+                // After creation, sign in again to establish a session
                 await signInWithEmailAndPassword(auth, ADMIN_EMAIL, ADMIN_MAGIC_CODE);
-                router.push('/admin');
+                router.replace('/admin');
             } catch (creationError: any) {
                  toast({
                     variant: 'destructive',
                     title: 'Admin Creation Failed',
-                    description: creationError.message,
+                    description: `This can happen if the admin account was created with a different password. Please check your setup. Error: ${creationError.message}`,
                 });
             }
         } else {
@@ -61,6 +76,16 @@ export default function AdminLoginPage() {
         setIsLoading(false);
     }
   };
+  
+    // Don't render the form if we're still checking auth state or if user is an admin
+   if (isUserLoading || (user && user.uid === ADMIN_UID)) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-primary" />
+      </div>
+    );
+  }
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
