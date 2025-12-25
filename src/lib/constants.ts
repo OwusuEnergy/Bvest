@@ -6,7 +6,6 @@ type NavLink = {
 
 export const publicNavLinks: NavLink[] = [
   { name: 'Home', path: '/' },
-  { name: 'How It Works', path: '/how-it-works' },
   { name: 'Investments', path: '/investments' },
   {
     name: 'About',
