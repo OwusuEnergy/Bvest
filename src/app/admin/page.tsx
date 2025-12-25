@@ -2,16 +2,10 @@
 'use client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { PageHeader } from "@/components/admin/page-header";
-import { Car, Users, Banknote, TrendingUp } from "lucide-react";
+import { Car, Users, Banknote } from "lucide-react";
 import { useCollection, useFirestore, useMemoFirebase } from "@/firebase";
 import { collection, query } from "firebase/firestore";
-
-const kpiCards = [
-    { title: "Total Revenue", icon: TrendingUp, value: "GHS 125,430", change: "+20.1% from last month" },
-    { title: "Total Investments", icon: Banknote, value: "842", change: "+150 this month" },
-    { title: "Active Users", icon: Users, value: "1,230", change: "+50 new users" },
-    { title: "Listed Cars", icon: Car, value: "45", change: "+5 new cars" },
-]
+import type { User } from "@/lib/types";
 
 export default function AdminDashboardPage() {
     const firestore = useFirestore();
@@ -20,7 +14,7 @@ export default function AdminDashboardPage() {
         if (!firestore) return null;
         return query(collection(firestore, 'users'));
     }, [firestore]);
-    const { data: users, isLoading: usersLoading } = useCollection(usersQuery);
+    const { data: users, isLoading: usersLoading } = useCollection<User>(usersQuery);
 
     const carsQuery = useMemoFirebase(() => {
         if (!firestore) return null;
@@ -32,7 +26,7 @@ export default function AdminDashboardPage() {
         return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS', currencyDisplay: 'symbol' }).format(amount);
     }
     
-    const totalInvested = users?.reduce((acc, user) => acc + (user.totalInvested || 0), 0);
+    const totalInvested = users?.reduce((acc, user) => acc + (user.totalInvested || 0), 0) ?? 0;
 
     const stats = [
         {
@@ -71,7 +65,9 @@ export default function AdminDashboardPage() {
                             <stat.icon className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{stat.value}</div>
+                            <div className="text-2xl font-bold">
+                                {usersLoading || carsLoading ? 'Loading...' : stat.value}
+                            </div>
                             <p className="text-xs text-muted-foreground">{stat.description}</p>
                         </CardContent>
                     </Card>
@@ -80,5 +76,3 @@ export default function AdminDashboardPage() {
         </div>
     )
 }
-
-    

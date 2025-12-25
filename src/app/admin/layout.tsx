@@ -23,14 +23,13 @@ import {
   Loader2,
   Settings,
   Shield,
-  User,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { adminNavLinks, authLinks } from "@/lib/constants";
+import { adminNavLinks } from "@/lib/constants";
 import { useEffect } from "react";
 import { useUser, useAuth } from "@/firebase";
 import { signOut } from "firebase/auth";
@@ -70,7 +69,7 @@ export default function AdminLayout({
     if (isLoginPage && isAdmin) {
       router.push('/admin');
     }
-  }, [isUserLoading, isAdmin, isLoginPage, router]);
+  }, [isUserLoading, user, isAdmin, isLoginPage, router]);
 
   const handleLogout = async () => {
     if (auth) {

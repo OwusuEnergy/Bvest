@@ -9,3 +9,16 @@ export type Car = {
   imageId: string;
   status: 'available' | 'fully-invested';
 };
+
+export type User = {
+    id: string;
+    name: string;
+    email: string;
+    balance: number;
+    totalEarned: number;
+    totalInvested?: number;
+    referralCode: string;
+    referralEarnings: number;
+    createdAt: any;
+    updatedAt: any;
+}
