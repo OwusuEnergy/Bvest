@@ -30,6 +30,7 @@ import { format, differenceInDays, addMonths, parseISO, formatDistanceToNow } fr
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
 
 const profitData = [
   { date: 'Jan', profit: 120 },
