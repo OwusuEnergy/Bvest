@@ -1,19 +1,13 @@
 
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { initializeApp, getApps, App, cert } from 'firebase-admin/app';
+import { initializeApp, getApps, App, applicationDefault } from 'firebase-admin/app';
 import { getFirestore, FieldValue } from 'firebase-admin/firestore';
-
-// This is a special service account JSON that will be populated by Firebase App Hosting.
-// It is not a secret and can be checked into source control.
-const serviceAccount = JSON.parse(
-  process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '{}'
-);
 
 // Initialize Firebase Admin SDK
 if (!getApps().length) {
   initializeApp({
-    credential: cert(serviceAccount),
+    credential: applicationDefault(),
   });
 }
 
