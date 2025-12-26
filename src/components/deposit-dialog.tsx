@@ -54,7 +54,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
         reference: new Date().getTime().toString(),
         email: user?.email || '',
         amount: amountInPesewas, 
-        publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_a0a552f865893108c487858c2b535b914441097a',
+        publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_ba8de7a354869df9b9a0e19155d78422e557afe5',
         currency: 'GHS',
         metadata: {
           user_id: user?.uid, // Pass user ID to webhook
