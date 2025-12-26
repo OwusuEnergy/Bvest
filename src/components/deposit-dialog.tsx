@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -45,7 +46,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     const form = useForm<DepositFormValues>({
         resolver: zodResolver(depositFormSchema),
         defaultValues: {
-            amount: undefined,
+            amount: '' as any,
         },
     });
 
