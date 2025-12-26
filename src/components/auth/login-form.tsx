@@ -127,8 +127,8 @@ export function LoginForm() {
         name: values.name,
         email: values.email,
         phone: values.phone,
-        balance: 0,
-        totalEarned: 0,
+        balance: 10, // Signup bonus
+        totalEarned: 10, // Signup bonus
         totalInvested: 0,
         referralCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
         referralEarnings: 0,
@@ -140,6 +140,18 @@ export function LoginForm() {
         userData.referredById = referrerId;
       }
       batch.set(userDocRef, userData);
+
+      // Add transaction for signup bonus
+      const transactionRef = doc(collection(firestore, `users/${user.uid}/transactions`));
+        batch.set(transactionRef, {
+            userId: user.uid,
+            type: 'Signup Bonus',
+            amount: 10,
+            balanceAfter: 10,
+            description: `Welcome bonus for signing up.`,
+            createdAt: serverTimestamp(),
+        });
+
 
       if (referrerId) {
         const referralRef = doc(collection(firestore, `users/${referrerId}/referrals`));

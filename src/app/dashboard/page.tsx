@@ -76,7 +76,7 @@ export default function DashboardPage() {
             if (!monthlyData[month]) {
                 monthlyData[month] = 0;
             }
-            if (txn.type === 'Referral Bonus' || txn.type === 'Profit') { // Assuming you might have a 'Profit' type
+            if (txn.type === 'Referral Bonus' || txn.type === 'Profit' || txn.type === 'Signup Bonus') { 
                  monthlyData[month] += txn.amount;
             }
         }
@@ -299,11 +299,11 @@ export default function DashboardPage() {
                             {recentTransactions && recentTransactions.map((txn, i) => (
                             <TableRow key={txn.id}>
                                 <TableCell>
-                                    <Badge variant={txn.type === 'Investment' ? 'secondary' : (txn.type === 'Referral Bonus' ? 'default' : 'outline')}>
+                                    <Badge variant={txn.type === 'Investment' ? 'secondary' : (txn.type === 'Referral Bonus' || txn.type === 'Signup Bonus' ? 'default' : 'outline')}>
                                         {txn.type}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className={`font-medium ${txn.type === 'Referral Bonus' ? 'text-green-500' : ''}`}>{formatCurrency(txn.amount)}</TableCell>
+                                <TableCell className={`font-medium ${txn.type === 'Referral Bonus' || txn.type === 'Signup Bonus' ? 'text-green-500' : ''}`}>{formatCurrency(txn.amount)}</TableCell>
                                 <TableCell>{txn.description}</TableCell>
                                 <TableCell className="text-muted-foreground">{formatDistanceToNowFromTimestamp(txn.createdAt)}</TableCell>
                             </TableRow>
