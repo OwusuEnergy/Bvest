@@ -1,18 +1,19 @@
 
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { PageHeader } from '@/components/admin/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useFirestore } from '@/firebase';
-import { collectionGroup, query, where, getDocs, doc, writeBatch, getDoc } from 'firebase/firestore';
+import { collectionGroup, query, where, getDocs, doc, writeBatch, getDoc, onSnapshot, Unsubscribe, collection, increment } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import type { User } from 'firebase/auth';
 
 type Withdrawal = {
   id: string;
@@ -36,50 +37,6 @@ export default function AdminWithdrawalsPage() {
     setIsClient(true);
   }, []);
 
-  const fetchWithdrawals = useMemo(() => async () => {
-    if (!firestore) return;
-    setIsLoading(true);
-    try {
-      const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawals'), where('status', '==', 'pending'));
-      const snapshot = await getDocs(withdrawalsQuery);
-      
-      const withdrawalsData = await Promise.all(snapshot.docs.map(async (withdrawalDoc) => {
-        const data = withdrawalDoc.data();
-        const userDocRef = doc(firestore, 'users', data.userId);
-        const userDoc = await getDoc(userDocRef);
-        const userName = userDoc.exists() ? userDoc.data().name : 'Unknown User';
-
-        return {
-          id: withdrawalDoc.id,
-          userId: data.userId,
-          amount: data.amount,
-          details: data.details,
-          status: data.status,
-          createdAt: data.createdAt.toDate(),
-          userName,
-        } as Withdrawal;
-      }));
-
-      setWithdrawals(withdrawalsData);
-    } catch (error) {
-      console.error("Error fetching withdrawals:", error);
-      toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: 'Could not fetch withdrawal requests.',
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [firestore, toast]);
-  
-  useEffect(() => {
-    if (firestore && isClient) {
-      fetchWithdrawals();
-    }
-  }, [firestore, isClient, fetchWithdrawals]);
-
-
   const handleRequest = async (withdrawal: Withdrawal, newStatus: 'processed' | 'rejected') => {
     if (!firestore) return;
 
@@ -100,8 +57,14 @@ export default function AdminWithdrawalsPage() {
         if (userData.balance < withdrawal.amount) {
           throw new Error('Insufficient user balance.');
         }
+        if (userData.totalEarned < withdrawal.amount) {
+          throw new Error('Withdrawal amount exceeds total profit.');
+        }
         const newBalance = userData.balance - withdrawal.amount;
-        batch.update(userDocRef, { balance: newBalance });
+        batch.update(userDocRef, { 
+            balance: newBalance,
+            totalEarned: increment(-withdrawal.amount)
+        });
 
         // Add a transaction record for the withdrawal
         const transactionRef = doc(collection(firestore, `users/${withdrawal.userId}/transactions`));
@@ -113,6 +76,8 @@ export default function AdminWithdrawalsPage() {
             description: `Withdrawal to ${withdrawal.details}`,
             createdAt: new Date(),
         });
+      } else if (newStatus === 'rejected') {
+        // If rejected, we don't change the balance or totalEarned, just the status
       }
       
       batch.update(withdrawalDocRef, { status: newStatus, processedAt: new Date() });
@@ -123,8 +88,7 @@ export default function AdminWithdrawalsPage() {
         title: 'Success',
         description: `Withdrawal has been ${newStatus}.`,
       });
-      // Refresh the list
-      fetchWithdrawals();
+      // Real-time listener will auto-update the list.
     } catch (error: any) {
       toast({
         variant: 'destructive',
@@ -135,6 +99,69 @@ export default function AdminWithdrawalsPage() {
       setProcessingId(null);
     }
   };
+  
+  useEffect(() => {
+    if (!firestore || !isClient) {
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+    let unsubscribe: Unsubscribe | null = null;
+    let userUnsubscribes: { [key: string]: Unsubscribe } = {};
+
+    try {
+      const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawals'), where('status', '==', 'pending'));
+      
+      unsubscribe = onSnapshot(withdrawalsQuery, async (snapshot) => {
+        if (snapshot.empty) {
+          setWithdrawals([]);
+          setIsLoading(false);
+          return;
+        }
+
+        let withdrawalsData: Omit<Withdrawal, 'userName'>[] = snapshot.docs.map(doc => ({
+            id: doc.id,
+            userId: doc.data().userId,
+            ...doc.data()
+        } as Omit<Withdrawal, 'userName'>));
+
+        const userIds = [...new Set(withdrawalsData.map(w => w.userId))];
+        const userPromises = userIds.map(uid => getDoc(doc(firestore, 'users', uid)));
+        const userDocs = await Promise.all(userPromises);
+        const userMap = new Map(userDocs.map(ud => [ud.id, ud.data()?.name || 'Unknown User']));
+
+        const finalData = withdrawalsData.map(w => ({
+          ...w,
+          createdAt: w.createdAt.toDate(),
+          userName: userMap.get(w.userId)
+        }));
+        
+        setWithdrawals(finalData);
+        setIsLoading(false);
+
+      }, (error) => {
+        console.error("Error fetching withdrawals:", error);
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not fetch withdrawal requests.',
+        });
+        setIsLoading(false);
+      });
+    
+    } catch (error) {
+       console.error("Error setting up snapshot:", error);
+       setIsLoading(false);
+    }
+
+    return () => {
+        if (unsubscribe) unsubscribe();
+        Object.values(userUnsubscribes).forEach(unsub => unsub());
+    };
+
+  }, [firestore, isClient, toast]);
+
 
   const formatCurrency = (amount: number = 0) => {
     return new Intl.NumberFormat('en-GH', { style: 'currency', currency: 'GHS' }).format(amount);
