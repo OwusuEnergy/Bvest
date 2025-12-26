@@ -1,5 +1,5 @@
 
-import { LayoutDashboard, Car, Users } from 'lucide-react';
+import { LayoutDashboard, Car, Users, Banknote, ArrowLeftRight } from 'lucide-react';
 
 type NavLink = {
   name: string;
@@ -44,4 +44,5 @@ export const adminNavLinks = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Cars", href: "/admin/cars", icon: Car },
   { name: "Users", href: "/admin/users", icon: Users },
+  { name: "Withdrawals", href: "/admin/withdrawals", icon: Banknote },
 ];
