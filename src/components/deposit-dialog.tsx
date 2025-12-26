@@ -28,6 +28,7 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
+import type { PaystackProps } from 'react-paystack/dist/types';
 
 
 const depositFormSchema = z.object({
@@ -39,6 +40,7 @@ type DepositFormValues = z.infer<typeof depositFormSchema>;
 export function DepositDialog({ children, user }: { children: React.ReactNode, user: User | null }) {
     const [open, setOpen] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
+    const [config, setConfig] = useState<PaystackProps | null>(null);
     const { toast } = useToast();
 
     const form = useForm<DepositFormValues>({
@@ -48,24 +50,12 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
         },
     });
 
-    const amountInPesewas = form.watch('amount') * 100;
+    const initializePayment = usePaystackPayment(config as PaystackProps);
 
-    const config = {
-        reference: new Date().getTime().toString(),
-        email: user?.email || '',
-        amount: amountInPesewas, 
-        publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_ba8de7a354869df9b9a0e19155d78422e557afe5',
-        currency: 'GHS',
-        metadata: {
-          user_id: user?.uid, // Pass user ID to webhook
-        }
-    };
-
-    const initializePayment = usePaystackPayment(config);
-
-    const onSuccess = (reference: { reference: string }) => {
+    const onSuccess = (reference: any) => {
         // The webhook will handle the database update.
         // We just show a success message to the user.
+        console.log('Paystack success reference:', reference);
         setPaymentSuccess(true);
         form.reset();
         setTimeout(() => {
@@ -83,8 +73,30 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
             toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to deposit.' });
             return;
         }
-        initializePayment({onSuccess, onClose});
+
+        const newConfig = {
+            reference: new Date().getTime().toString(),
+            email: user.email || '',
+            amount: values.amount * 100, // Use submitted value
+            publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_ba8de7a354869df9b9a0e19155d78422e557afe5',
+            currency: 'GHS',
+            metadata: {
+              user_id: user.uid, // Pass user ID to webhook
+            }
+        };
+
+        setConfig(newConfig);
+        
+        // useEffect will trigger payment initialization
     }
+
+    // Effect to initialize payment when config is set
+    React.useEffect(() => {
+        if (config) {
+            initializePayment({onSuccess, onClose});
+        }
+    }, [config, initializePayment]);
+
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
