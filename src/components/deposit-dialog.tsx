@@ -80,7 +80,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
             reference: new Date().getTime().toString(),
             email: user.email || '',
             amount: amountInPesewas,
-            publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_ba8de7a354869df9b9a0e19155d78422e557afe5',
+            publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_live_696b47bdfe6ba1b3d4edc5b185f7c22c7d707a82',
             currency: 'GHS',
             metadata: {
               user_id: user.uid, // Pass user ID to webhook
@@ -130,6 +130,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
                                         type="number" 
                                         placeholder="e.g., 100" 
                                         {...field}
+                                        onChange={(e) => field.onChange(e.target.value)}
                                         />
                                     </FormControl>
                                     <FormMessage />
