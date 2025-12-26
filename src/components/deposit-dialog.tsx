@@ -1,3 +1,4 @@
+
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -26,8 +27,6 @@ import { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import type { User } from 'firebase/auth';
-import { useFirestore } from '@/firebase';
-import { doc, writeBatch, collection, serverTimestamp, increment, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 
@@ -39,9 +38,7 @@ type DepositFormValues = z.infer<typeof depositFormSchema>;
 
 export function DepositDialog({ children, user }: { children: React.ReactNode, user: User | null }) {
     const [open, setOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
-    const firestore = useFirestore();
     const { toast } = useToast();
 
     const form = useForm<DepositFormValues>({
@@ -59,64 +56,22 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
         amount: amountInPesewas, 
         publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_a0a552f865893108c487858c2b535b914441097a',
         currency: 'GHS',
+        metadata: {
+          user_id: user?.uid, // Pass user ID to webhook
+        }
     };
 
     const initializePayment = usePaystackPayment(config);
 
-    const onSuccess = async (reference: any) => {
-        setIsLoading(true);
-        if (!user || !firestore) {
-            toast({ variant: 'destructive', title: 'Error', description: 'User or database not available.' });
-            setIsLoading(false);
-            return;
-        }
-
-        const depositAmount = config.amount / 100;
-        const batch = writeBatch(firestore);
-        const userDocRef = doc(firestore, 'users', user.uid);
-        
-        try {
-            const userDoc = await getDoc(userDocRef);
-            if (!userDoc.exists()) {
-                throw new Error("User document not found.");
-            }
-            const currentBalance = userDoc.data().balance || 0;
-            const newBalance = currentBalance + depositAmount;
-
-            // 1. Update user balance
-            batch.update(userDocRef, {
-                balance: increment(depositAmount),
-            });
-
-            // 2. Create a transaction record
-            const transactionRef = doc(collection(firestore, `users/${user.uid}/transactions`));
-            batch.set(transactionRef, {
-                userId: user.uid,
-                type: 'Deposit',
-                amount: depositAmount,
-                balanceAfter: newBalance,
-                description: `Deposit via Paystack. Ref: ${reference.reference}`,
-                createdAt: serverTimestamp(),
-            });
-
-            await batch.commit();
-            
-            setPaymentSuccess(true);
-            form.reset();
-            setTimeout(() => {
-                setOpen(false);
-                setPaymentSuccess(false);
-            }, 3000);
-
-        } catch (error: any) {
-            toast({
-                variant: 'destructive',
-                title: 'Deposit Failed',
-                description: 'Failed to update your balance. Please contact support.',
-            });
-        } finally {
-            setIsLoading(false);
-        }
+    const onSuccess = (reference: any) => {
+        // The webhook will handle the database update.
+        // We just show a success message to the user.
+        setPaymentSuccess(true);
+        form.reset();
+        setTimeout(() => {
+            setOpen(false);
+            setPaymentSuccess(false);
+        }, 4000);
     };
 
     const onClose = () => {
@@ -124,6 +79,10 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     };
 
     function onSubmit(values: DepositFormValues) {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to deposit.' });
+            return;
+        }
         initializePayment({onSuccess, onClose});
     }
 
@@ -140,9 +99,9 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
                 {paymentSuccess ? (
                     <Alert className="border-green-500 text-green-700">
                         <CheckCircle className="h-4 w-4 !text-green-500" />
-                        <AlertTitle>Success!</AlertTitle>
+                        <AlertTitle>Processing!</AlertTitle>
                         <AlertDescription>
-                            Your deposit was successful. Your balance has been updated.
+                            Your payment is being processed. Your balance will be updated shortly.
                         </AlertDescription>
                     </Alert>
                 ) : (
@@ -161,9 +120,8 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
                                 </FormItem>
                                 )}
                             />
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                Proceed to Paystack
+                            <Button type="submit" className="w-full">
+                                Proceed to Deposit
                             </Button>
                         </form>
                     </Form>
