@@ -37,6 +37,12 @@ const depositFormSchema = z.object({
 
 type DepositFormValues = z.infer<typeof depositFormSchema>;
 
+const depositPlans = [
+    { name: 'Silver', amount: 100 },
+    { name: 'Bronze', amount: 300 },
+    { name: 'Gold', amount: 500 },
+];
+
 export function DepositDialog({ children, user }: { children: React.ReactNode, user: User | null }) {
     const [open, setOpen] = useState(false);
     const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -80,7 +86,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
             reference: new Date().getTime().toString(),
             email: user.email || '',
             amount: amountInPesewas,
-            publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || '',
+            publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_live_696b47bdfe6ba1b3d4edc5b185f7c22c7d707a82',
             currency: 'GHS',
             metadata: {
               user_id: user.uid, // Pass user ID to webhook
@@ -119,18 +125,32 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
                 ) : (
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
+                            <div className="space-y-2">
+                                <FormLabel>Select an amount</FormLabel>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {depositPlans.map((plan) => (
+                                        <Button
+                                            key={plan.name}
+                                            type="button"
+                                            variant={form.watch('amount') === plan.amount ? 'default' : 'outline'}
+                                            onClick={() => form.setValue('amount', plan.amount, { shouldValidate: true })}
+                                        >
+                                            {plan.amount} GHS
+                                        </Button>
+                                    ))}
+                                </div>
+                            </div>
                             <FormField
                                 control={form.control}
                                 name="amount"
                                 render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Amount (GHS)</FormLabel>
+                                    <FormLabel>Or enter custom amount (GHS)</FormLabel>
                                     <FormControl>
                                     <Input 
                                         type="number" 
                                         placeholder="e.g., 100" 
                                         {...field}
-                                        onChange={(e) => field.onChange(e.target.value)}
                                         />
                                     </FormControl>
                                     <FormMessage />
