@@ -38,7 +38,7 @@ export async function POST(req: Request) {
 
   if (event.event === 'charge.success') {
     const { data } = event;
-    const { amount, reference, customer } = data;
+    const { amount, reference } = data;
     const depositAmount = amount / 100; // Paystack sends amount in pesewas/kobo
     const userId = data.metadata?.user_id;
 
