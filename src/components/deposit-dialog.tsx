@@ -46,7 +46,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     const form = useForm<DepositFormValues>({
         resolver: zodResolver(depositFormSchema),
         defaultValues: {
-            amount: '' as any,
+            amount: undefined
         },
     });
 
@@ -126,7 +126,16 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
                                 <FormItem>
                                     <FormLabel>Amount (GHS)</FormLabel>
                                     <FormControl>
-                                    <Input type="number" placeholder="e.g., 100" {...field} />
+                                    <Input 
+                                        type="number" 
+                                        placeholder="e.g., 100" 
+                                        {...field} 
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            field.onChange(value === '' ? undefined : value);
+                                        }}
+                                        value={field.value ?? ''}
+                                        />
                                     </FormControl>
                                     <FormMessage />
                                 </FormItem>
