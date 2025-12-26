@@ -26,9 +26,9 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { DepositDialog } from './deposit-dialog';
 
 const investmentPlans = [
-  { name: 'Silver', amount: 100, description: 'A great starting point', dailyProfitPercentage: 0.05, bgClass: 'bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400', textClass: 'text-slate-800' },
-  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', dailyProfitPercentage: 0.10, bgClass: 'bg-gradient-to-br from-orange-300 via-yellow-600 to-orange-400', textClass: 'text-white' },
-  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', dailyProfitPercentage: 0.20, bgClass: 'bg-gradient-to-br from-yellow-300 via-amber-500 to-yellow-600', textClass: 'text-amber-900' },
+  { name: 'Silver', amount: 100, description: 'A great starting point (5% daily profit)', dailyProfitPercentage: 0.05, bgClass: 'bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400', textClass: 'text-slate-800' },
+  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth (10% daily profit)', dailyProfitPercentage: 0.10, bgClass: 'bg-gradient-to-br from-orange-300 via-yellow-600 to-orange-400', textClass: 'text-white' },
+  { name: 'Gold', amount: 500, description: 'Maximize your potential returns (20% daily profit)', dailyProfitPercentage: 0.20, bgClass: 'bg-gradient-to-br from-yellow-300 via-amber-500 to-yellow-600', textClass: 'text-amber-900' },
 ];
 
 export function InvestmentDialog({ car }: { car: Car }) {
