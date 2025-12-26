@@ -169,7 +169,7 @@ export function LoginForm() {
 
       await batch.commit();
 
-      router.push(authLinks.dashboard);
+      router.push(authLinks.dashboard + '?new_user=true');
     } catch (error: any) {
       toast({
         variant: 'destructive',

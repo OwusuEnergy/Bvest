@@ -17,10 +17,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
   Users,
   TrendingUp,
   Wallet,
   Copy,
+  PartyPopper,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
@@ -31,8 +39,37 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
-export default function DashboardPage() {
+function WelcomeBonusDialog() {
+    const searchParams = useSearchParams();
+    const [showWelcome, setShowWelcome] = useState(false);
+
+    useEffect(() => {
+        if (searchParams.get('new_user') === 'true') {
+            setShowWelcome(true);
+        }
+    }, [searchParams]);
+
+    return (
+        <Dialog open={showWelcome} onOpenChange={setShowWelcome}>
+            <DialogContent>
+                <DialogHeader>
+                <DialogTitle className="flex items-center gap-2">
+                    <PartyPopper className="h-6 w-6 text-primary" />
+                    Welcome to BVest!
+                </DialogTitle>
+                <DialogDescription className="pt-4 text-center text-lg">
+                    Congratulations! A <strong className="text-primary">10 GHS</strong> bonus has been added to your account to get you started.
+                </DialogDescription>
+                </DialogHeader>
+            </DialogContent>
+        </Dialog>
+    )
+}
+
+function DashboardComponent() {
   const { user } = useUser();
   const firestore = useFirestore();
   const { toast } = useToast();
@@ -151,6 +188,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8 animate-fade-in-up">
+      <WelcomeBonusDialog />
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {statsCards.map((card, index) => (
           <Card key={card.title} className="animate-fade-in-up" style={{animationDelay: `${index * 100}ms`}}>
@@ -361,4 +399,12 @@ export default function DashboardPage() {
 
     </div>
   );
+}
+
+export default function DashboardPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <DashboardComponent />
+        </Suspense>
+    )
 }
