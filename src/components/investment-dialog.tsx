@@ -25,9 +25,9 @@ import { CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 const investmentPlans = [
-  { name: 'Silver', amount: 100, description: 'A great starting point', colorClass: 'border-slate-300' },
-  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', colorClass: 'border-orange-400' },
-  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', colorClass: 'border-amber-400' },
+  { name: 'Silver', amount: 100, description: 'A great starting point', bgClass: 'bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400', textClass: 'text-slate-800' },
+  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', bgClass: 'bg-gradient-to-br from-orange-300 via-yellow-600 to-orange-400', textClass: 'text-white' },
+  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', bgClass: 'bg-gradient-to-br from-yellow-300 via-amber-500 to-yellow-600', textClass: 'text-amber-900' },
 ];
 
 export function InvestmentDialog({ car }: { car: Car }) {
@@ -217,14 +217,16 @@ export function InvestmentDialog({ car }: { car: Car }) {
                 key={plan.name}
                 onClick={() => setSelectedPlan(plan)}
                 className={cn(
-                    'cursor-pointer transition-all hover:scale-105 border-2',
-                    selectedPlan?.name === plan.name ? `ring-2 ring-primary ring-offset-2 ring-offset-background ${plan.colorClass}` : 'border-transparent'
+                    'cursor-pointer transition-all hover:scale-105 border-0',
+                    plan.bgClass,
+                    plan.textClass,
+                    selectedPlan?.name === plan.name ? `ring-2 ring-primary ring-offset-2 ring-offset-background` : 'border-transparent'
                 )}
                 >
                 <CardContent className="p-4 flex justify-between items-center">
                     <div>
                     <h4 className="font-semibold">{plan.name} Plan</h4>
-                    <p className="text-sm text-muted-foreground">{plan.description}</p>
+                    <p className="text-sm opacity-80">{plan.description}</p>
                     </div>
                     <p className="text-lg font-bold">GH₵ {plan.amount}</p>
                 </CardContent>
