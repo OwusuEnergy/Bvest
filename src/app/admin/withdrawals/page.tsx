@@ -1,19 +1,18 @@
 
 'use client';
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { PageHeader } from '@/components/admin/page-header';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useFirestore } from '@/firebase';
-import { collectionGroup, query, where, getDocs, doc, writeBatch, getDoc, onSnapshot, Unsubscribe, collection, increment } from 'firebase/firestore';
+import { collectionGroup, query, where, doc, writeBatch, getDoc, onSnapshot, Unsubscribe, collection, increment } from 'firebase/firestore';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import type { User } from 'firebase/auth';
 
 type Withdrawal = {
   id: string;
@@ -54,16 +53,21 @@ export default function AdminWithdrawalsPage() {
       const userData = userDoc.data();
 
       if (newStatus === 'processed') {
+        // This is where you would call the Paystack API to initiate the transfer.
+        // For this example, we assume the transfer is successful if the admin clicks "Approve".
+        // In a real app, you'd await a response from your payment gateway's API here.
+
         if (userData.balance < withdrawal.amount) {
           throw new Error('Insufficient user balance.');
         }
         if (userData.totalEarned < withdrawal.amount) {
-          throw new Error('Withdrawal amount exceeds total profit.');
+            throw new Error('Withdrawal amount exceeds total profit.');
         }
+
         const newBalance = userData.balance - withdrawal.amount;
         batch.update(userDocRef, { 
             balance: newBalance,
-            totalEarned: increment(-withdrawal.amount)
+            totalEarned: increment(-withdrawal.amount) 
         });
 
         // Add a transaction record for the withdrawal
@@ -76,12 +80,14 @@ export default function AdminWithdrawalsPage() {
             description: `Withdrawal to ${withdrawal.details}`,
             createdAt: new Date(),
         });
+
+        batch.update(withdrawalDocRef, { status: newStatus, processedAt: new Date() });
+
       } else if (newStatus === 'rejected') {
-        // If rejected, we don't change the balance or totalEarned, just the status
+        // If rejected, we don't change the balance, just the status
+        batch.update(withdrawalDocRef, { status: newStatus, processedAt: new Date() });
       }
       
-      batch.update(withdrawalDocRef, { status: newStatus, processedAt: new Date() });
-
       await batch.commit();
 
       toast({
@@ -108,10 +114,9 @@ export default function AdminWithdrawalsPage() {
 
     setIsLoading(true);
     let unsubscribe: Unsubscribe | null = null;
-    let userUnsubscribes: { [key: string]: Unsubscribe } = {};
-
+    
     try {
-      const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawals'), where('status', '==', 'pending'));
+      const withdrawalsQuery = query(collectionGroup(firestore, 'withdrawals'));
       
       unsubscribe = onSnapshot(withdrawalsQuery, async (snapshot) => {
         if (snapshot.empty) {
@@ -133,9 +138,9 @@ export default function AdminWithdrawalsPage() {
 
         const finalData = withdrawalsData.map(w => ({
           ...w,
-          createdAt: w.createdAt.toDate(),
+          createdAt: w.createdAt?.toDate ? w.createdAt.toDate() : new Date(),
           userName: userMap.get(w.userId)
-        }));
+        })).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime());
         
         setWithdrawals(finalData);
         setIsLoading(false);
@@ -157,7 +162,6 @@ export default function AdminWithdrawalsPage() {
 
     return () => {
         if (unsubscribe) unsubscribe();
-        Object.values(userUnsubscribes).forEach(unsub => unsub());
     };
 
   }, [firestore, isClient, toast]);
@@ -171,6 +175,15 @@ export default function AdminWithdrawalsPage() {
     if (!date) return 'N/A';
     return format(date, 'MMM dd, yyyy - hh:mm a');
   };
+  
+  const statusBadgeVariant = (status: Withdrawal['status']) => {
+    switch (status) {
+      case 'pending': return 'secondary';
+      case 'processed': return 'default';
+      case 'rejected': return 'destructive';
+      default: return 'outline';
+    }
+  }
 
   return (
     <div>
@@ -197,7 +210,7 @@ export default function AdminWithdrawalsPage() {
                   <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                   <TableCell><Skeleton className="h-5 w-40" /></TableCell>
                   <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
-                  <TableCell className="text-right"><Skeleton className="h-8 w-32 float-right" /></TableCell>
+                  <TableCell className="text-right"><Skeleton className="h-8 w-48 float-right" /></TableCell>
                 </TableRow>
               ))}
               {!isLoading && withdrawals.map((withdrawal) => (
@@ -207,7 +220,7 @@ export default function AdminWithdrawalsPage() {
                   <TableCell>{withdrawal.details}</TableCell>
                   <TableCell>{formatDate(withdrawal.createdAt)}</TableCell>
                   <TableCell>
-                    <Badge variant={withdrawal.status === 'pending' ? 'secondary' : 'default'}>{withdrawal.status}</Badge>
+                    <Badge variant={statusBadgeVariant(withdrawal.status)}>{withdrawal.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     {withdrawal.status === 'pending' && (
@@ -236,7 +249,7 @@ export default function AdminWithdrawalsPage() {
               ))}
               {!isLoading && withdrawals.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center h-24">No pending withdrawal requests.</TableCell>
+                  <TableCell colSpan={6} className="text-center h-24">No withdrawal requests found.</TableCell>
                 </TableRow>
               )}
             </TableBody>

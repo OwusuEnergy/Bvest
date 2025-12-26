@@ -73,11 +73,11 @@ service cloud.firestore {
      * @principle Enforces strict self-service and ownership for user profiles and prevents user enumeration.
      */
     match /users/{userId} {
-      allow get: if isOwner(userId);
+      allow get: if isOwner(userId) || isAdmin();
       allow list: if true; // Public read for admin dashboard
       allow create: if isOwner(userId) && request.resource.data.id == userId;
-      allow update: if isOwner(userId);
-      allow delete: if isOwner(userId);
+      allow update: if isOwner(userId) || isAdmin();
+      allow delete: if isAdmin();
     }
 
     /**
@@ -116,9 +116,9 @@ service cloud.firestore {
      * @principle Restricts access to a user's own data tree using path-based ownership.
      */
     match /users/{userId}/withdrawals/{withdrawalId} {
-      allow get, list: if isOwner(userId);
+      allow get, list: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && request.resource.data.userId == userId;
-      allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
+      allow update: if isOwner(userId) || isAdmin();
       allow delete: if isExistingOwner(userId);
     }
 
@@ -130,7 +130,7 @@ service cloud.firestore {
      * @principle Restricts access to a user's own data tree using path-based ownership.
      */
     match /users/{userId}/transactions/{transactionId} {
-      allow get, list: if isOwner(userId);
+      allow get, list: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) || isOwner(request.resource.data.userId); // Allow for referral bonus
       allow update: if isExistingOwner(userId) && request.resource.data.userId == resource.data.userId;
       allow delete: if isExistingOwner(userId);
