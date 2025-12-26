@@ -23,6 +23,7 @@ import type { Car } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { DepositDialog } from './deposit-dialog';
 
 const investmentPlans = [
   { name: 'Silver', amount: 100, description: 'A great starting point', bgClass: 'bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400', textClass: 'text-slate-800' },
@@ -47,6 +48,8 @@ export function InvestmentDialog({ car }: { car: Car }) {
 
   const { data: userProfile } = useDoc<{balance: number, referredById?: string, totalInvested?: number}>(userProfileRef);
 
+  const hasSufficientFunds = userProfile && selectedPlan && userProfile.balance >= selectedPlan.amount;
+
   const handleInvest = async () => {
     if (!user) {
       toast({
@@ -65,7 +68,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
       });
       return;
     }
-    if (!userProfile || (userProfile.balance < selectedPlan.amount)) {
+    if (!hasSufficientFunds) {
       toast({
         variant: 'destructive',
         title: 'Insufficient Funds',
@@ -240,10 +243,16 @@ export function InvestmentDialog({ car }: { car: Car }) {
                 <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                 </DialogClose>
-                <Button onClick={handleInvest} disabled={!selectedPlan || isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {isLoading ? 'Processing...' : `Invest GH₵ ${selectedPlan?.amount || ''}`}
-                </Button>
+                {selectedPlan && !hasSufficientFunds ? (
+                    <DepositDialog user={user}>
+                        <Button>Deposit</Button>
+                    </DepositDialog>
+                ) : (
+                    <Button onClick={handleInvest} disabled={!selectedPlan || isLoading}>
+                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        {isLoading ? 'Processing...' : `Invest GH₵ ${selectedPlan?.amount || ''}`}
+                    </Button>
+                )}
             </DialogFooter>
         )}
       </DialogContent>
