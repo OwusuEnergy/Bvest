@@ -49,6 +49,7 @@ const loginSchema = z.object({
 const signupSchema = z.object({
   name: z.string().min(1, 'Name is required.'),
   email: z.string().email(),
+  phone: z.string().min(1, 'Phone number is required.'),
   password: z.string().min(8, 'Password must be at least 8 characters.'),
 });
 
@@ -71,7 +72,7 @@ export function LoginForm() {
 
   const signupForm = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { name: '', email: '', password: '' },
+    defaultValues: { name: '', email: '', phone: '', password: '' },
   });
 
   const handleLogin = async (values: z.infer<typeof loginSchema>) => {
@@ -125,6 +126,7 @@ export function LoginForm() {
         id: user.uid,
         name: values.name,
         email: values.email,
+        phone: values.phone,
         balance: 0,
         totalEarned: 0,
         totalInvested: 0,
@@ -264,6 +266,19 @@ export function LoginForm() {
                       <FormLabel>Email</FormLabel>
                       <FormControl>
                         <Input type="email" placeholder="m@example.com" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signupForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="e.g. 0241234567" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

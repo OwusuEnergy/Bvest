@@ -71,6 +71,7 @@
       "required": [
         "id",
         "email",
+        "phone",
         "referralCode",
         "createdAt",
         "updatedAt"

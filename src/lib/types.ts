@@ -14,6 +14,7 @@ export type User = {
     id: string;
     name: string;
     email: string;
+    phone: string;
     balance: number;
     totalEarned: number;
     totalInvested?: number;
