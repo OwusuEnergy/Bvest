@@ -23,7 +23,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { usePaystackPayment } from 'react-paystack';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { CheckCircle, Loader2 } from 'lucide-react';
 import type { User } from 'firebase/auth';
@@ -77,7 +77,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
         const newConfig = {
             reference: new Date().getTime().toString(),
             email: user.email || '',
-            amount: values.amount * 100, // Use submitted value
+            amount: values.amount * 100, // Paystack amount is in pesewas/kobo
             publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_ba8de7a354869df9b9a0e19155d78422e557afe5',
             currency: 'GHS',
             metadata: {
@@ -86,8 +86,6 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
         };
 
         setConfig(newConfig);
-        
-        // useEffect will trigger payment initialization
     }
 
     // Effect to initialize payment when config is set
