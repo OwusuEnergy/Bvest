@@ -26,9 +26,9 @@ import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import { DepositDialog } from './deposit-dialog';
 
 const investmentPlans = [
-  { name: 'Silver', amount: 100, description: 'A great starting point', bgClass: 'bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400', textClass: 'text-slate-800' },
-  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', bgClass: 'bg-gradient-to-br from-orange-300 via-yellow-600 to-orange-400', textClass: 'text-white' },
-  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', bgClass: 'bg-gradient-to-br from-yellow-300 via-amber-500 to-yellow-600', textClass: 'text-amber-900' },
+  { name: 'Silver', amount: 100, description: 'A great starting point', dailyProfitPercentage: 0.05, bgClass: 'bg-gradient-to-br from-slate-200 via-slate-300 to-slate-400', textClass: 'text-slate-800' },
+  { name: 'Bronze', amount: 300, description: 'A popular choice for steady growth', dailyProfitPercentage: 0.10, bgClass: 'bg-gradient-to-br from-orange-300 via-yellow-600 to-orange-400', textClass: 'text-white' },
+  { name: 'Gold', amount: 500, description: 'Maximize your potential returns', dailyProfitPercentage: 0.20, bgClass: 'bg-gradient-to-br from-yellow-300 via-amber-500 to-yellow-600', textClass: 'text-amber-900' },
 ];
 
 export function InvestmentDialog({ car }: { car: Car }) {
@@ -82,6 +82,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
     try {
       const batch = writeBatch(firestore);
       const userDocRef = doc(firestore, 'users', user.uid);
+      const dailyProfitAmount = selectedPlan.amount * selectedPlan.dailyProfitPercentage;
 
       // 1. Handle main investment transaction
       const newBalance = userProfile.balance - selectedPlan.amount;
@@ -102,7 +103,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
         startDate: serverTimestamp(),
         endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)),
         status: 'Active',
-        dailyProfit: 0,
+        dailyProfit: dailyProfitAmount,
         totalProfit: 0,
         createdAt: serverTimestamp(),
       });
