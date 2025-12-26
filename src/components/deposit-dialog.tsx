@@ -63,7 +63,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
 
     const initializePayment = usePaystackPayment(config);
 
-    const onSuccess = (reference: any) => {
+    const onSuccess = (reference: { reference: string }) => {
         // The webhook will handle the database update.
         // We just show a success message to the user.
         setPaymentSuccess(true);
