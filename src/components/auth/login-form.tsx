@@ -107,6 +107,9 @@ export function LoginForm() {
             title: 'Invalid Referral Code',
             description: 'The referral code you used is not valid.',
           });
+          // Do not proceed if referral code is invalid
+          setIsLoading(false);
+          return;
         }
       }
 
@@ -124,6 +127,7 @@ export function LoginForm() {
         email: values.email,
         balance: 0,
         totalEarned: 0,
+        totalInvested: 0,
         referralCode: Math.random().toString(36).substring(2, 10).toUpperCase(),
         referralEarnings: 0,
         createdAt: serverTimestamp(),

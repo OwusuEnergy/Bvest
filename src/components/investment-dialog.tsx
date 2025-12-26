@@ -46,7 +46,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
     return doc(firestore, 'users', user.uid);
   }, [firestore, user]);
 
-  const { data: userProfile } = useDoc<{balance: number, referredById?: string, totalInvested?: number}>(userProfileRef);
+  const { data: userProfile } = useDoc<{balance: number, referredById?: string, totalInvested?: number, name?: string}>(userProfileRef);
 
   const hasSufficientFunds = userProfile && selectedPlan && userProfile.balance >= selectedPlan.amount;
 
@@ -122,6 +122,8 @@ export function InvestmentDialog({ car }: { car: Car }) {
       if (userProfile.referredById && isFirstInvestment) {
         const commissionAmount = selectedPlan.amount * 0.30;
         const referrerRef = doc(firestore, 'users', userProfile.referredById);
+        
+        // We need to get the referrer's current data for accurate transaction logging.
         const referrerDoc = await getDoc(referrerRef);
 
         if (referrerDoc.exists()) {
@@ -145,7 +147,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
             createdAt: serverTimestamp(),
           });
 
-          // Update the referral document
+          // Update the referral document earned amount
           const referralQuery = query(
             collection(firestore, `users/${userProfile.referredById}/referrals`),
             where('referredId', '==', user.uid)
@@ -243,7 +245,7 @@ export function InvestmentDialog({ car }: { car: Car }) {
                 <DialogClose asChild>
                     <Button variant="outline">Cancel</Button>
                 </DialogClose>
-                {selectedPlan && !hasSufficientFunds ? (
+                {user && selectedPlan && !hasSufficientFunds ? (
                     <DepositDialog user={user}>
                         <Button>Deposit</Button>
                     </DepositDialog>
