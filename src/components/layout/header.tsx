@@ -1,3 +1,4 @@
+
 'use client';
 
 import Link from 'next/link';
@@ -100,7 +101,7 @@ export function Header() {
               )
             )}
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <ThemeToggle />
             {isUserLoading ? (
               <div className='w-[180px] h-10 bg-muted rounded-md animate-pulse' />
@@ -108,16 +109,15 @@ export function Header() {
               <>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="icon">
-                      <Wallet className="h-5 w-5" />
-                      <span className="sr-only">Open wallet menu</span>
+                     <Button variant="outline">
+                        <Wallet className="h-5 w-5 mr-2" />
+                        <span>{formatCurrency(userProfile?.balance)}</span>
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none">Wallet Balance</p>
-                        <p className="text-lg font-semibold leading-none text-foreground">{formatCurrency(userProfile?.balance)}</p>
+                        <p className="text-sm font-medium leading-none">Wallet Actions</p>
                       </div>
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
@@ -173,16 +173,15 @@ export function Header() {
            {user && !isUserLoading && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Wallet className="h-5 w-5" />
-                  <span className="sr-only">Open wallet menu</span>
+                 <Button variant="outline">
+                    <Wallet className="h-5 w-5 mr-2" />
+                    <span className="text-sm">{formatCurrency(userProfile?.balance)}</span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="font-normal">
                   <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">Wallet Balance</p>
-                    <p className="text-lg font-semibold leading-none text-foreground">{formatCurrency(userProfile?.balance)}</p>
+                     <p className="text-sm font-medium leading-none">Wallet Actions</p>
                   </div>
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
