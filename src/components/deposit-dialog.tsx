@@ -1,4 +1,3 @@
-
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -25,7 +24,7 @@ import {
 import { usePaystackPayment } from 'react-paystack';
 import React, { useState } from 'react';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import type { PaystackProps } from 'react-paystack/dist/types';
@@ -46,7 +45,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     const form = useForm<DepositFormValues>({
         resolver: zodResolver(depositFormSchema),
         defaultValues: {
-            amount: 100,
+            amount: undefined,
         },
     });
 
@@ -74,10 +73,12 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
             return;
         }
 
-        const newConfig = {
+        const amountInPesewas = values.amount * 100;
+
+        const newConfig: PaystackProps = {
             reference: new Date().getTime().toString(),
             email: user.email || '',
-            amount: values.amount * 100, // Paystack amount is in pesewas/kobo
+            amount: amountInPesewas,
             publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_test_ba8de7a354869df9b9a0e19155d78422e557afe5',
             currency: 'GHS',
             metadata: {
