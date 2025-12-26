@@ -34,7 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { useCollection, useDoc, useFirestore, useMemoFirebase, useUser } from "@/firebase";
 import { collection, doc, query, orderBy, Timestamp, limit } from "firebase/firestore";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { format, differenceInDays, addMonths, parseISO, formatDistanceToNow } from 'date-fns';
+import { format, differenceInDays, addMonths, parseISO, formatDistanceToNow, eachDayOfInterval, startOfDay } from 'date-fns';
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
@@ -103,28 +103,38 @@ function DashboardComponent() {
   const { data: allTransactions } = useCollection(allTransactionsQuery);
 
   const chartData = useMemoFirebase(() => {
-    if (!allTransactions) return [];
-    
-    const monthlyData: {[key: string]: number} = {};
+    if (!allTransactions || allTransactions.length === 0) return [];
 
+    const dailyData: { [key: string]: number } = {};
+    let firstDate: Date | null = null;
+    
     allTransactions.forEach(txn => {
         if (txn.createdAt) {
-            const month = format(txn.createdAt.toDate(), 'MMM');
-            if (!monthlyData[month]) {
-                monthlyData[month] = 0;
+            const date = startOfDay(txn.createdAt.toDate());
+            if (!firstDate || date < firstDate) {
+                firstDate = date;
             }
-            if (txn.type === 'Referral Bonus' || txn.type === 'Profit' || txn.type === 'Signup Bonus') { 
-                 monthlyData[month] += txn.amount;
+            const dateString = format(date, 'yyyy-MM-dd');
+            if (!dailyData[dateString]) {
+                dailyData[dateString] = 0;
+            }
+            if (txn.type === 'Referral Bonus' || txn.type === 'Profit' || txn.type === 'Signup Bonus') {
+                dailyData[dateString] += txn.amount;
             }
         }
     });
 
-    const monthOrder = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-    
-    return monthOrder.map(month => ({
-        date: month,
-        profit: monthlyData[month] || 0
-    })).filter(d => d.profit > 0);
+    if (!firstDate) return [];
+
+    const dateRange = eachDayOfInterval({ start: firstDate, end: new Date() });
+
+    return dateRange.map(date => {
+        const dateString = format(date, 'yyyy-MM-dd');
+        return {
+            date: format(date, 'MMM d'),
+            profit: dailyData[dateString] || 0,
+        };
+    });
 
   }, [allTransactions]);
 
@@ -207,8 +217,8 @@ function DashboardComponent() {
         <div className="lg:col-span-2 flex flex-col gap-8">
              <Card>
                 <CardHeader>
-                  <CardTitle className="font-headline">Monthly Profit</CardTitle>
-                  <CardDescription>Your profit earnings over the last months.</CardDescription>
+                  <CardTitle className="font-headline">Daily Profit</CardTitle>
+                  <CardDescription>Your daily profit earnings.</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -408,3 +418,5 @@ export default function DashboardPage() {
         </Suspense>
     )
 }
+
+    
