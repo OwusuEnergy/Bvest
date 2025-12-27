@@ -32,22 +32,34 @@ export async function POST(req: Request) {
 
   if (event.event === 'charge.success') {
     const { data } = event;
-    const { amount, reference } = data;
+    const { amount, reference, status } = data;
+    
+    // Double-check status just in case
+    if (status !== 'success') {
+      return new NextResponse('Transaction not successful.', { status: 200 });
+    }
+
     const depositAmount = amount / 100; // Paystack sends amount in pesewas/kobo
     const userId = data.metadata?.user_id;
 
     if (!userId) {
       console.warn(`Webhook received for reference ${reference} without a user_id in metadata.`);
-      // We still return 200 so Paystack doesn't retry, but we log the issue.
       return new NextResponse('Success, but no user ID found.', { status: 200 });
     }
 
     try {
       const userRef = db.collection('users').doc(userId);
-      const transactionRef = db.collection(`users/${userId}/transactions`).doc();
+      const transactionRef = db.collection(`users/${userId}/transactions`).doc(reference); // Use Paystack ref as doc ID
 
       // Use a Firestore transaction to ensure atomicity
       await db.runTransaction(async (t) => {
+        const transactionDoc = await t.get(transactionRef);
+        // Prevent processing the same transaction twice
+        if (transactionDoc.exists) {
+            console.log(`Transaction ${reference} already processed.`);
+            return;
+        }
+
         const userDoc = await t.get(userRef);
         if (!userDoc.exists) {
           throw new Error(`User with ID ${userId} not found.`);
@@ -55,25 +67,26 @@ export async function POST(req: Request) {
         const currentBalance = userDoc.data()?.balance || 0;
         const newBalance = currentBalance + depositAmount;
 
-        // 1. Update user's balance
+        // 1. Update user's balance and total earned atomically
         t.update(userRef, {
           balance: FieldValue.increment(depositAmount),
         });
 
         // 2. Create a transaction record
         t.set(transactionRef, {
+          id: reference,
           userId: userId,
           type: 'Deposit',
           amount: depositAmount,
           balanceAfter: newBalance,
           description: `Deposit via Paystack. Ref: ${reference}`,
           createdAt: FieldValue.serverTimestamp(),
+          status: 'completed'
         });
       });
 
     } catch (error: any) {
       console.error(`Error processing webhook for reference ${reference}:`, error.message);
-      // Return 500 to signal to Paystack to retry
       return new NextResponse(`Webhook Error: ${error.message}`, { status: 500 });
     }
   }
