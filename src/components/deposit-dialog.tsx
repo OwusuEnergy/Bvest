@@ -105,23 +105,24 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     // This is called when the user closes the payment dialog
   };
 
-  const initializePayment = usePaystackPayment({
-      reference: new Date().getTime().toString(),
-      email: user?.email || '',
-      amount: (form.watch('amount') || 0) * 100,
-      publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-      currency: 'GHS',
-      metadata: {
-        user_id: user?.uid, // Pass user ID to webhook
-      }
-  });
+  const initializePayment = usePaystackPayment();
 
   function onSubmit(values: DepositFormValues) {
     if (!user) {
       toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to deposit.' });
       return;
     }
-     initializePayment({ onSuccess, onClose });
+    const config: PaystackProps = {
+      reference: new Date().getTime().toString(),
+      email: user.email!,
+      amount: values.amount * 100, // Amount in pesewas/kobo
+      publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+      currency: 'GHS',
+      metadata: {
+        user_id: user.uid,
+      },
+    };
+    initializePayment({ onSuccess, onClose, config });
   }
 
   return (
