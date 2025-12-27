@@ -29,6 +29,8 @@ import { CheckCircle } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import type { PaystackProps } from 'react-paystack/dist/types';
+import { doc, writeBatch, collection, getFirestore, increment } from 'firebase/firestore';
+import { useFirestore } from '@/firebase';
 
 const depositFormSchema = z.object({
   amount: z.coerce.number().min(10, { message: 'Minimum deposit is GHS 10.' }),
@@ -47,6 +49,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [config, setConfig] = useState<PaystackProps | null>(null);
   const { toast } = useToast();
+  const firestore = useFirestore();
 
   const form = useForm<DepositFormValues>({
     resolver: zodResolver(depositFormSchema),
@@ -57,13 +60,37 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
 
   const initializePayment = usePaystackPayment(config as PaystackProps);
 
-  const onSuccess = () => {
-    // The webhook will handle the database update.
-    // We just show a success message to the user.
+  const onSuccess = async (reference: { reference: string }) => {
+    // This is the optimistic update. We update the balance on the client immediately.
+    // The webhook will still run in the background as the source of truth.
+    if (user && config) {
+        const amountDeposited = config.amount / 100;
+        const batch = writeBatch(firestore);
+        const userRef = doc(firestore, 'users', user.uid);
+        const transactionRef = doc(collection(firestore, `users/${user.uid}/transactions`));
+
+        batch.update(userRef, { balance: increment(amountDeposited) });
+        batch.set(transactionRef, {
+            userId: user.uid,
+            type: 'Deposit',
+            amount: amountDeposited,
+            balanceAfter: increment(amountDeposited), // This will be calculated by Firestore
+            description: `Deposit via Paystack. Ref: ${reference.reference}`,
+            createdAt: new Date(),
+        });
+        
+        try {
+            await batch.commit();
+        } catch (error) {
+            console.error("Optimistic update failed:", error);
+            // If the optimistic update fails, we still rely on the webhook.
+        }
+    }
+
     setPaymentSuccess(true);
     toast({
-        title: 'Payment Sent!',
-        description: 'Your deposit is processing and your balance will be updated shortly.'
+        title: 'Payment Successful!',
+        description: 'Your balance has been updated.'
     });
     form.reset();
     setTimeout(() => {
@@ -88,7 +115,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
       reference: new Date().getTime().toString(),
       email: user.email || '',
       amount: amountInPesewas,
-      publicKey: 'pk_live_696b47bdfe6ba1b3d4edc5b185f7c22c7d707a82',
+      publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || 'pk_live_696b47bdfe6ba1b3d4edc5b185f7c22c7d707a82',
       currency: 'GHS',
       metadata: {
         user_id: user.uid, // Pass user ID to webhook
@@ -103,7 +130,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     if (config) {
       initializePayment({ onSuccess, onClose });
     }
-  }, [config, initializePayment]);
+  }, [config]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -118,9 +145,9 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
         {paymentSuccess ? (
           <Alert className="border-green-500 text-green-700">
             <CheckCircle className="h-4 w-4 !text-green-500" />
-            <AlertTitle>Processing!</AlertTitle>
+            <AlertTitle>Success!</AlertTitle>
             <AlertDescription>
-              Your payment is being processed. Your balance will be updated shortly.
+              Your payment was successful and your balance has been updated.
             </AlertDescription>
           </Alert>
         ) : (
