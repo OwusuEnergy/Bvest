@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -25,11 +25,11 @@ import {
 } from '@/components/ui/dialog';
 import { usePaystackPayment } from 'react-paystack';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
-import { CheckCircle, Loader2 } from 'lucide-react';
+import { CheckCircle } from 'lucide-react';
 import type { User } from 'firebase/auth';
 import { useToast } from '@/hooks/use-toast';
 import type { PaystackProps } from 'react-paystack/dist/types';
-import { doc, writeBatch, collection, getFirestore, increment, getDoc } from 'firebase/firestore';
+import { doc, writeBatch, collection, increment, getDoc } from 'firebase/firestore';
 import { useFirestore } from '@/firebase';
 
 const depositFormSchema = z.object({
@@ -47,7 +47,6 @@ const depositPlans = [
 export function DepositDialog({ children, user }: { children: React.ReactNode, user: User | null }) {
   const [open, setOpen] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
-  const [config, setConfig] = useState<PaystackProps | null>(null);
   const { toast } = useToast();
   const firestore = useFirestore();
 
@@ -58,31 +57,27 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     },
   });
 
-  const initializePayment = usePaystackPayment(config as PaystackProps);
-
   const onSuccess = async (reference: { reference: string }) => {
     toast({
         title: 'Payment Processing...',
         description: 'Your payment is being processed and your balance will be updated shortly.'
     });
 
-    // Optimistic update for instant UI feedback
-    if (user && config && firestore) {
-        const amountDeposited = config.amount / 100;
+    if (user && firestore) {
+        const amountDeposited = form.getValues('amount');
         const userRef = doc(firestore, 'users', user.uid);
-        const transactionRef = doc(collection(firestore, `users/${user.uid}/transactions`), reference.reference);
-
+        
         try {
             const batch = writeBatch(firestore);
-            
-            // Get current user data to calculate new balance for transaction log
-            const userDoc = await getDoc(userRef);
-            const currentBalance = userDoc.data()?.balance || 0;
-            const newBalance = currentBalance + amountDeposited;
-
             batch.update(userRef, { balance: increment(amountDeposited) });
+            await batch.commit();
 
-            batch.set(transactionRef, {
+             // Create transaction record after successful optimistic update
+            const userDoc = await getDoc(userRef);
+            const newBalance = userDoc.data()?.balance || 0;
+            const transactionRef = doc(collection(firestore, `users/${user.uid}/transactions`), reference.reference);
+            const transactionBatch = writeBatch(firestore);
+            transactionBatch.set(transactionRef, {
                 id: reference.reference,
                 userId: user.uid,
                 type: 'Deposit',
@@ -90,12 +85,11 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
                 balanceAfter: newBalance,
                 description: `Deposit via Paystack. Ref: ${reference.reference}`,
                 createdAt: new Date(),
-                status: 'pending' // Status is pending until webhook confirms
+                status: 'pending' 
             });
-            await batch.commit();
+            await transactionBatch.commit();
         } catch (error) {
             console.error("Optimistic update failed:", error);
-            // Don't worry, the webhook will still handle it as the source of truth.
         }
     }
 
@@ -111,33 +105,24 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     // This is called when the user closes the payment dialog
   };
 
+  const initializePayment = usePaystackPayment({
+      reference: new Date().getTime().toString(),
+      email: user?.email || '',
+      amount: (form.watch('amount') || 0) * 100,
+      publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+      currency: 'GHS',
+      metadata: {
+        user_id: user?.uid, // Pass user ID to webhook
+      }
+  });
+
   function onSubmit(values: DepositFormValues) {
     if (!user) {
       toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to deposit.' });
       return;
     }
-
-    const amountInPesewas = values.amount * 100;
-
-    const newConfig: PaystackProps = {
-      reference: new Date().getTime().toString(),
-      email: user.email || '',
-      amount: amountInPesewas,
-      publicKey: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-      currency: 'GHS',
-      metadata: {
-        user_id: user.uid, // Pass user ID to webhook
-      }
-    };
-
-    setConfig(newConfig);
+     initializePayment({ onSuccess, onClose });
   }
-
-  useEffect(() => {
-    if (config) {
-      initializePayment({ onSuccess, onClose });
-    }
-  }, [config, initializePayment]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -186,7 +171,6 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
                         type="number"
                         placeholder="e.g., 50.50"
                         {...field}
-                         onChange={(e) => field.onChange(e.target.value)}
                       />
                     </FormControl>
                     <FormMessage />
