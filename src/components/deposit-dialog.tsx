@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -57,7 +56,7 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
     },
   });
 
-  const onSuccess = async (reference: { reference: string }) => {
+  const onSuccess = (reference: { reference: string }) => {
     toast({
         title: 'Payment Processing...',
         description: 'Your payment is being processed and your balance will be updated shortly.'
@@ -67,30 +66,27 @@ export function DepositDialog({ children, user }: { children: React.ReactNode, u
         const amountDeposited = form.getValues('amount');
         const userRef = doc(firestore, 'users', user.uid);
         
-        try {
-            const batch = writeBatch(firestore);
-            batch.update(userRef, { balance: increment(amountDeposited) });
-            await batch.commit();
-
-             // Create transaction record after successful optimistic update
-            const userDoc = await getDoc(userRef);
-            const newBalance = userDoc.data()?.balance || 0;
-            const transactionRef = doc(collection(firestore, `users/${user.uid}/transactions`), reference.reference);
-            const transactionBatch = writeBatch(firestore);
-            transactionBatch.set(transactionRef, {
-                id: reference.reference,
-                userId: user.uid,
-                type: 'Deposit',
-                amount: amountDeposited,
-                balanceAfter: newBalance,
-                description: `Deposit via Paystack. Ref: ${reference.reference}`,
-                createdAt: new Date(),
-                status: 'pending' 
-            });
-            await transactionBatch.commit();
-        } catch (error) {
+        const batch = writeBatch(firestore);
+        
+        // Optimistically update the user's balance
+        batch.update(userRef, { balance: increment(amountDeposited) });
+        
+        // Create transaction record
+        const transactionRef = doc(collection(firestore, `users/${user.uid}/transactions`), reference.reference);
+        batch.set(transactionRef, {
+            id: reference.reference,
+            userId: user.uid,
+            type: 'Deposit',
+            amount: amountDeposited,
+            description: `Deposit via Paystack. Ref: ${reference.reference}`,
+            createdAt: new Date(),
+            status: 'pending' // Status will be updated by webhook
+        });
+        
+        batch.commit().catch(error => {
             console.error("Optimistic update failed:", error);
-        }
+            // Optionally revert the UI change or notify the user
+        });
     }
 
     setPaymentSuccess(true);
